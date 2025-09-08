@@ -10,6 +10,7 @@ public class Lesson01_Exercise : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _arial;
+    private string _outputString = "This is a string that will bounce around.";
     private float _x = 0, _amountToAddToX = 150, _directionX = 1;
     private float _y;
 
@@ -36,15 +37,14 @@ public class Lesson01_Exercise : Game
 
     protected override void Update(GameTime gameTime)
     {
+        Vector2 stringDimensions = _arial.MeasureString(_outputString);
+
         _x += _amountToAddToX * _directionX * (float) gameTime.ElapsedGameTime.TotalSeconds;
-        if (_x > _WindowWidth)
+        if (_x + stringDimensions.X > _WindowWidth || _x < 0)
         {
             _directionX *= -1;
         }
-        if (_x < 0)
-        {
-            _directionX *= -1;
-        }
+
         //_y += 15 * (float) gameTime.ElapsedGameTime.TotalSeconds;
             base.Update(gameTime);
     }
@@ -54,7 +54,7 @@ public class Lesson01_Exercise : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin();
-        _spriteBatch.DrawString(_arial, "Hello World.", new Vector2(_x, _y), Color.White);
+        _spriteBatch.DrawString(_arial, _outputString, new Vector2(_x, _y), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
