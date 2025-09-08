@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,9 +11,10 @@ public class Lesson01_Exercise : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private SpriteFont _arial;
+    private Color _colorToDraw = Color.White;
     private string _outputString = "This is a string that will bounce around.";
     private float _x = 0, _amountToAddToX = 150, _directionX = 1;
-    private float _y;
+    private float _y, _amountToAddToY = 150, _directionY = 1;
 
     public Lesson01_Exercise()
     {
@@ -39,14 +41,22 @@ public class Lesson01_Exercise : Game
     {
         Vector2 stringDimensions = _arial.MeasureString(_outputString);
 
-        _x += _amountToAddToX * _directionX * (float) gameTime.ElapsedGameTime.TotalSeconds;
+        _x += _amountToAddToX * _directionX * (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (_x + stringDimensions.X > _WindowWidth || _x < 0)
         {
             _directionX *= -1;
+            _amountToAddToX += 10;
+            _colorToDraw = GenerateRandomColour();
         }
 
-        //_y += 15 * (float) gameTime.ElapsedGameTime.TotalSeconds;
-            base.Update(gameTime);
+        _y += _amountToAddToY * _directionY * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (_y + stringDimensions.Y > _WindowHeight || _y < 0)
+        {
+            _directionY *= -1;
+            _amountToAddToY += 100;
+            _colorToDraw = GenerateRandomColour();
+        }
+        base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -54,9 +64,20 @@ public class Lesson01_Exercise : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin();
-        _spriteBatch.DrawString(_arial, _outputString, new Vector2(_x, _y), Color.White);
+        _spriteBatch.DrawString(_arial, _outputString, new Vector2(_x, _y), _colorToDraw);
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    protected Color GenerateRandomColour()
+    {
+        Random random = new Random();
+
+        return new Color(
+            random.Next(256), // R
+            random.Next(256), // G
+            random.Next(256)  // B
+);
     }
 }
