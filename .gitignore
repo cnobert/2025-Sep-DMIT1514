@@ -1,0 +1,37 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS Code - keep settings if you want them tracked; otherwise uncomment next line
+#.vscode/
+
+# Build outputs - all projects
+**/bin/
+**/obj/
+
+# MonoGame Content Pipeline outputs - keep raw assets and Content.mgcb
+**/Content/bin/
+**/Content/obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Logs
+*.log
+
+# Rider/JetBrains
+.idea/
+*.ipr
+*.iws
+*.iml
