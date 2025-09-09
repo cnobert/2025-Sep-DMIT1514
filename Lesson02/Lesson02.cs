@@ -1,21 +1,19 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-namespace Lesson01_Exercise;
+namespace Lesson02;
 
-public class Lesson01_Exercise : Game
+public class Lesson02 : Game
 {
     private const int _WindowWidth = 640, _WindowHeight = 320;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private SpriteFont _arial;
-    private Color _colorToDraw = Color.White;
-    private string _outputString = "This is a string that will bounce around.";
     private float _x = 0, _amountToAddToX = 150, _directionX = 1;
     private float _y, _amountToAddToY = 150, _directionY = 1;
-
-    public Lesson01_Exercise()
+    private Texture2D _spaceStation, _ship;
+    private float _rotation = 0;
+    public Lesson02()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -27,35 +25,31 @@ public class Lesson01_Exercise : Game
         _graphics.PreferredBackBufferWidth = _WindowWidth;
         _graphics.PreferredBackBufferHeight = _WindowHeight;
         _graphics.ApplyChanges();
-
         base.Initialize();
     }
-
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _arial = Content.Load<SpriteFont>("SystemArialFont");
+        _spaceStation = Content.Load<Texture2D>("Station");
+        _ship = Content.Load<Texture2D>("Beetle");
+
     }
 
     protected override void Update(GameTime gameTime)
     {
-        Vector2 stringDimensions = _arial.MeasureString(_outputString);
 
         _x += _amountToAddToX * _directionX * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (_x + stringDimensions.X > _WindowWidth || _x < 0)
+        if (_x + _ship.Width > _WindowWidth || _x < 0)
         {
             _directionX *= -1;
-            _amountToAddToX += 10;
-            _colorToDraw = GenerateRandomColour();
         }
 
         _y += _amountToAddToY * _directionY * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (_y + stringDimensions.Y > _WindowHeight || _y < 0)
+        if (_y + _ship.Height > _WindowHeight || _y < 0)
         {
             _directionY *= -1;
-            _amountToAddToY += 100;
-            _colorToDraw = GenerateRandomColour();
         }
+        _rotation += 6 * (float)gameTime.ElapsedGameTime.TotalSeconds;
         base.Update(gameTime);
     }
 
@@ -65,21 +59,13 @@ public class Lesson01_Exercise : Game
 
         _spriteBatch.Begin();
 
-        _spriteBatch.DrawString(_arial, _outputString, new Vector2(_x, _y), _colorToDraw);
-
+        _spriteBatch.Draw(_spaceStation, Vector2.Zero, Color.White);
+        _spriteBatch.Draw(_ship, new Vector2(_x + (_ship.Bounds.Width / 2), 
+                _y + (_ship.Bounds.Height / 2)), null, Color.White, _rotation, 
+                new Vector2(_ship.Bounds.Width / 2, _ship.Bounds.Height / 2), 1, SpriteEffects.None, 0);
+ 
         _spriteBatch.End();
 
         base.Draw(gameTime);
-    }
-
-    protected Color GenerateRandomColour()
-    {
-        Random random = new Random();
-
-        return new Color(
-            random.Next(256), // R
-            random.Next(256), // G
-            random.Next(256)  // B
-);
     }
 }
