@@ -66,7 +66,23 @@ public class InputGame : Game
             _message += "------------------------------------------------------\n";
             _message += "------------------------------------------------------\n";
         }
-
+        #endregion
+        #region "key hold" state
+        else if (kbCurrentState.IsKeyDown(Keys.Space))
+        {
+            _message += "Space ";
+        }
+        #endregion
+        #region "key up" state
+        else if (_kbPreviousState.IsKeyDown(Keys.Space)) //last call to update, "space" was down
+        {
+            //"space" is not currently down
+            _message += "------------------------------------------------------\n";
+            _message += "------------------------------------------------------\n";
+            _message += "------------------------------------------------------\n";
+            _message += "------------------------------------------------------\n";
+            _message += "------------------------------------------------------\n";
+        }
         #endregion
         _kbPreviousState = kbCurrentState;
         base.Update(gameTime);
