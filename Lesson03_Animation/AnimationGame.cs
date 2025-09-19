@@ -44,7 +44,9 @@ public class AnimationGame : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin();
+
         _walkingAnimation.Draw(_spriteBatch, new Vector2(100, 200), SpriteEffects.None);
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
