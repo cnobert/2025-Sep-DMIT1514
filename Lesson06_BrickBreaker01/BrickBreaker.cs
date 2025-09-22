@@ -49,7 +49,13 @@ public class BrickBreaker : Game
 
     protected override void Update(GameTime gameTime)
     {
-
+        KeyboardState kb = Keyboard.GetState();
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (kb.IsKeyDown(Keys.Left) || kb.IsKeyDown(Keys.A))
+        {
+            _paddlePosition.X -= _paddleSpeed * deltaTime;
+        }
+        
         base.Update(gameTime);
     }
 
@@ -60,7 +66,7 @@ public class BrickBreaker : Game
 
         Rectangle paddleRectangle = new Rectangle((int)_paddlePosition.X, (int)_paddlePosition.Y, _PaddleWidth, _PaddleHeight);
 
-        _spriteBatch.Draw(_pixel, paddleRectangle, Color.White);
+        _spriteBatch.Draw(_pixel, paddleRectangle, Color.Brown);
 
         _spriteBatch.End();
 
