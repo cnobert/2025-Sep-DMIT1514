@@ -55,7 +55,21 @@ public class BrickBreaker : Game
         {
             _paddlePosition.X -= _paddleSpeed * deltaTime;
         }
-        
+        if (kb.IsKeyDown(Keys.Right) || kb.IsKeyDown(Keys.D))
+        {
+            _paddlePosition.X += _paddleSpeed * deltaTime;
+        }
+        //fix any screen overrunds (pin to one side or the other if we're exiting the screen)
+        //right side
+        if (_paddlePosition.X > _WindowWidth - _PaddleWidth)
+        {
+            _paddlePosition.X = _WindowWidth - _PaddleWidth;
+        }
+        //left side
+        if (_paddlePosition.X < 0.0f)
+        {
+            _paddlePosition.X = 0.0f;
+        }
         base.Update(gameTime);
     }
 
