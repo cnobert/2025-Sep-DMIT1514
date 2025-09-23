@@ -14,12 +14,15 @@ public class BrickBreaker : Game
 
     //Paddle
     private Vector2 _paddlePosition;
-    private const int _PaddleWidth = 120, _PaddleHeight = 18;
     private float _paddleSpeed = 400.0f;
+    private const int _PaddleWidth = 120, _PaddleHeight = 18;
 
     //Ball
     private Vector2 _ballPosition;
+    private Vector2 _ballVelocity;
+    private bool _ballLaunched = false;
     private const int _BallSize = 16;
+    private const float _BallSpeed = 500;
 
     public BrickBreaker()
     {
@@ -41,6 +44,11 @@ public class BrickBreaker : Game
             _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
             _paddlePosition.Y - _BallSize - 5
         );
+        _ballLaunched = true;
+        //first give it direction only
+        _ballVelocity = new Vector2(0.35f, -1.0f);
+        //now give it a magnitude (speed)
+        _ballVelocity *= _BallSpeed;
 
         base.Initialize();
     }
@@ -81,9 +89,16 @@ public class BrickBreaker : Game
             _paddlePosition.X = 0.0f;
         }
 
-        //keep ball resting above paddle
-        _ballPosition.X = _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2);
-        _ballPosition.Y = _paddlePosition.Y - _BallSize - 5;
+        if (!_ballLaunched)
+        {
+            //keep ball resting above paddle
+            _ballPosition.X = _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2);
+            _ballPosition.Y = _paddlePosition.Y - _BallSize - 5;
+        }
+        else //ball is in play!
+        {
+            _ballPosition += _ballVelocity * deltaTime;
+        }
 
         base.Update(gameTime);
     }
