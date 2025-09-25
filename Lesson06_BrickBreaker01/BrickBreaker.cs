@@ -44,9 +44,9 @@ public class BrickBreaker : Game
             _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
             _paddlePosition.Y - _BallSize - 5
         );
-        _ballLaunched = true;
+        _ballLaunched = false;
         //first give it direction only
-        _ballVelocity = new Vector2(0.35f, -1.0f);
+        _ballVelocity = new Vector2(0.9f, -1.0f);
         //now give it a magnitude (speed)
         _ballVelocity *= _BallSpeed;
 
@@ -94,10 +94,33 @@ public class BrickBreaker : Game
             //keep ball resting above paddle
             _ballPosition.X = _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2);
             _ballPosition.Y = _paddlePosition.Y - _BallSize - 5;
+
+            if (kb.IsKeyDown(Keys.Space))
+            {
+                _ballLaunched = true;
+            }
+
         }
         else //ball is in play!
         {
             _ballPosition += _ballVelocity * deltaTime;
+            //left and right walls
+            if (_ballPosition.X <= 0.0f)
+            {
+                _ballPosition.X = 0.0f;
+                _ballVelocity.X *= -1;
+            }
+            if (_ballPosition.X + _BallSize >= _WindowWidth)
+            {
+                _ballPosition.X = _WindowWidth - _BallSize;
+                _ballVelocity.X *= -1;
+            }
+            //top wall
+            if (_ballPosition.Y <= 0.0f)
+            {
+                _ballPosition.Y = 0.0f;
+                _ballVelocity.Y *= -1;
+            }
         }
 
         base.Update(gameTime);
