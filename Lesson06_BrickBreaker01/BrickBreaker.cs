@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -20,9 +19,24 @@ public class BrickBreaker : Game
     //Ball
     private Vector2 _ballPosition;
     private Vector2 _ballVelocity;
-    private bool _ballLaunched = false;
+    private bool _ballLaunched = false; //this is our first game object state
     private const int _BallSize = 16;
     private const float _BallSpeed = 500;
+
+    //read-only, derived property
+    private Rectangle PaddleRectangle => new Rectangle(
+        (int)_paddlePosition.X, 
+        (int)_paddlePosition.Y, 
+        _PaddleWidth, 
+        _PaddleHeight
+    );
+    //read-only, derived property
+    private Rectangle BallRectangle => new Rectangle(
+        (int)_ballPosition.X, 
+        (int)_ballPosition.Y, 
+        _BallSize, 
+        _BallSize
+    );
 
     public BrickBreaker()
     {
@@ -130,11 +144,9 @@ public class BrickBreaker : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
-
-        Rectangle paddleRectangle = new Rectangle((int)_paddlePosition.X, (int)_paddlePosition.Y, _PaddleWidth, _PaddleHeight);
-        Rectangle ballRectangle = new Rectangle((int)_ballPosition.X, (int)_ballPosition.Y, _BallSize, _BallSize);
-        _spriteBatch.Draw(_pixel, paddleRectangle, Color.Brown);
-        _spriteBatch.Draw(_pixel, ballRectangle, Color.OrangeRed);
+;
+        _spriteBatch.Draw(_pixel, PaddleRectangle, Color.Brown);
+        _spriteBatch.Draw(_pixel, BallRectangle, Color.OrangeRed);
 
         _spriteBatch.End();
 

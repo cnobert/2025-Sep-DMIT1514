@@ -1,0 +1,11 @@
+{
+  "terminal.integrated.profiles.osx": {
+    "Rosetta zsh": { "path": "arch", "args": ["-x86_64", "zsh", "-l"] }
+  },
+  "terminal.integrated.defaultProfile.osx": "Rosetta zsh",
+  "terminal.integrated.env.osx": {
+    "DOTNET_ROOT": "/usr/local/share/dotnet/x64",
+    "DOTNET_HOST_PATH": "/usr/local/share/dotnet/x64/dotnet",
+    "PATH": "/usr/local/share/dotnet/x64:${env:PATH}"
+  }
+}
