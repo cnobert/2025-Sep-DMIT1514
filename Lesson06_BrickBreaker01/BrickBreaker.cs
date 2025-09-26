@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Lesson06_BrickBreaker01;
 
@@ -58,11 +59,8 @@ public class BrickBreaker : Game
             _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
             _paddlePosition.Y - _BallSize - 5
         );
-        _ballLaunched = false;
-        //first give it direction only
-        _ballVelocity = new Vector2(0.9f, -1.0f);
-        //now give it a magnitude (speed)
-        _ballVelocity *= _BallSpeed;
+        
+        ResetBallOnPaddle();
 
         base.Initialize();
     }
@@ -135,8 +133,30 @@ public class BrickBreaker : Game
                 _ballPosition.Y = 0.0f;
                 _ballVelocity.Y *= -1;
             }
-        }
+            //bottom of window
+            if(_ballPosition.Y > 1.2f * _WindowHeight)
+            {
+                ResetBallOnPaddle();
+            }
+#region collisions
+            //collide with Paddle, if needed
+            if(BallRectangle.Intersects(PaddleRectangle))
+            {
+                _ballPosition.Y = _paddlePosition.Y - _BallSize;
+                _ballVelocity.Y *= -1;
 
+                float hitRatio = (
+                    (_ballPosition.X + _BallSize / 2f) -
+                    (_paddlePosition.X + _PaddleWidth / 2f)
+                ) / (_PaddleWidth / 2f); //returns -1.0, -0.5, 0, +0.5, +1.0
+
+                _ballVelocity.X = MathHelper.Clamp(hitRatio, -1f, 1f) * _BallSpeed;
+
+                _ballVelocity.Normalize();
+                _ballVelocity *= _BallSpeed;
+            }
+#endregion
+        }
         base.Update(gameTime);
     }
 
@@ -151,5 +171,19 @@ public class BrickBreaker : Game
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+    private void ResetBallOnPaddle()
+    {
+        _ballLaunched = false;
+        // Direction points generally upward; X may be left or right
+        Random rando = new Random();
+        float dirX = 0.9f;
+        int choice = rando.Next(2);
+        if(choice == 0)
+        {
+            dirX = -0.9f;
+        }
+        _ballVelocity = new Vector2(dirX, -1f);
+        _ballVelocity *= _BallSpeed;
     }
 }
