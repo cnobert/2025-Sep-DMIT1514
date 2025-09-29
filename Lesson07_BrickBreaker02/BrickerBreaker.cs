@@ -12,23 +12,30 @@ public class BrickBreaker : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _pixel;
 
-    //Paddle
-    private Vector2 _paddlePosition;
-    private float _paddleSpeed = 400.0f;
-    private const int _PaddleWidth = 120, _PaddleHeight = 18;
-
-    //Ball
+    #region Paddle
+        private Vector2 _paddlePosition;
+        private float _paddleSpeed = 400.0f;
+        private const int _PaddleWidth = 120, _PaddleHeight = 18;
+    #endregion
+    #region Ball
     private Vector2 _ballPosition;
     private Vector2 _ballVelocity;
     private bool _ballLaunched = false; //this is our first game object state
     private const int _BallSize = 16;
     private const float _BallSpeed = 500;
-
-    //read-only, derived property
+    #endregion
+    #region Brick
+    private Rectangle _brickRectangle;
+    private Color _brickColour = Color.SandyBrown;
+    private bool _brickAlive = true;
+    private const int _BrickWidth = 90, _BrickHeight = 28;
+    
+    #endregion
+    #region derived properties
     private Rectangle PaddleRectangle => new Rectangle(
-        (int)_paddlePosition.X, 
-        (int)_paddlePosition.Y, 
-        _PaddleWidth, 
+        (int)_paddlePosition.X,
+        (int)_paddlePosition.Y,
+        _PaddleWidth,
         _PaddleHeight
     );
     //read-only, derived property
@@ -38,6 +45,7 @@ public class BrickBreaker : Game
         _BallSize, 
         _BallSize
     );
+    #endregion
 
     public BrickBreaker()
     {
@@ -59,7 +67,11 @@ public class BrickBreaker : Game
             _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
             _paddlePosition.Y - _BallSize - 5
         );
-        
+
+        int brickX = (_WindowWidth - _BrickWidth) / 2;
+        int brickY = 100;
+        _brickRectangle = new Rectangle(brickX, brickY, _BrickWidth, _BrickHeight);
+
         ResetBallOnPaddle();
 
         base.Initialize();
@@ -116,7 +128,8 @@ public class BrickBreaker : Game
         else //ball is in play!
         {
             _ballPosition += _ballVelocity * deltaTime;
-            //left and right walls
+
+            #region Walls collisions
             if (_ballPosition.X <= 0.0f)
             {
                 _ballPosition.X = 0.0f;
@@ -134,28 +147,73 @@ public class BrickBreaker : Game
                 _ballVelocity.Y *= -1;
             }
             //bottom of window
-            if(_ballPosition.Y > 1.2f * _WindowHeight)
+            if (_ballPosition.Y > 1.2f * _WindowHeight)
             {
                 ResetBallOnPaddle();
             }
-#region collisions
+            #endregion
+            #region Paddle collisions
             //collide with Paddle, if needed
-            if(BallRectangle.Intersects(PaddleRectangle))
+            if (BallRectangle.Intersects(PaddleRectangle))
             {
                 _ballPosition.Y = _paddlePosition.Y - _BallSize;
-                _ballVelocity.Y *= -1;
+                _ballVelocity.Y *= -1; //change y direction
 
+                //divides the paddle into 5 regions, and returns a number depending on which region was hit
                 float hitRatio = (
                     (_ballPosition.X + _BallSize / 2f) -
                     (_paddlePosition.X + _PaddleWidth / 2f)
                 ) / (_PaddleWidth / 2f); //returns -1.0, -0.5, 0, +0.5, +1.0
 
-                _ballVelocity.X = MathHelper.Clamp(hitRatio, -1f, 1f) * _BallSpeed;
+                _ballVelocity.X = MathHelper.Clamp(hitRatio, -1f, 1f) * _BallSpeed; //change x direction
 
-                _ballVelocity.Normalize();
-                _ballVelocity *= _BallSpeed;
+                _ballVelocity.Normalize();//strip the speed
+                _ballVelocity *= _BallSpeed; //add back the speed
             }
-#endregion
+            #endregion
+            #region Brick collisions
+            if (_brickAlive && BallRectangle.Intersects(_brickRectangle))
+            {
+                _brickAlive = false;
+                //make the ball bounce off the brick using the shallowest-overlap bounce technique
+
+                float overlapLeft = BallRectangle.Right - _brickRectangle.Left;
+                float overlapRight = _brickRectangle.Right - BallRectangle.Left;
+                float overlapTop = BallRectangle.Bottom - _brickRectangle.Top;
+                float overlapBottom = _brickRectangle.Bottom - BallRectangle.Top;
+
+                float minXOverlap = Math.Min(overlapLeft, overlapRight);
+                float minYOverlap = Math.Min(overlapTop, overlapBottom);
+
+                //did it a side?
+                if (minXOverlap < minYOverlap)
+                {
+                    //it hit the left side
+                    if (overlapLeft < overlapRight)
+                    {
+                        _ballPosition.X -= overlapLeft;
+                    }
+                    else // hit the right side
+                    {
+                        _ballPosition.X += overlapRight;
+                    }
+                    _ballVelocity.X *= -1.0f;
+                }
+                else //did it hit the top or bottom?
+                {
+                    //it hit the top
+                    if (overlapTop < overlapBottom)
+                    {
+                        _ballPosition.Y -= overlapTop;
+                    }
+                    else //hit the bottom
+                    {
+                        _ballPosition.Y += overlapBottom;
+                    }
+                    _ballVelocity.Y *= -1.0f;
+                }
+            }
+            #endregion
         }
         base.Update(gameTime);
     }
@@ -167,6 +225,11 @@ public class BrickBreaker : Game
 ;
         _spriteBatch.Draw(_pixel, PaddleRectangle, Color.Brown);
         _spriteBatch.Draw(_pixel, BallRectangle, Color.OrangeRed);
+
+        if (_brickAlive)
+        {
+            _spriteBatch.Draw(_pixel, _brickRectangle, _brickColour);
+        }
 
         _spriteBatch.End();
 
