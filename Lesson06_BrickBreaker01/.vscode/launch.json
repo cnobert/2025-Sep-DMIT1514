@@ -1,14 +1,15 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "C#: Lesson06_BrickBreaker01 Debug",
-        "type": "dotnet",
-        "request": "launch",
-        "projectPath": "${workspaceFolder}/Lesson06_BrickBreaker01.csproj"
-      }
-    ],
+  "terminal.integrated.profiles.osx": {
+    "Rosetta bash": {
+      "path": "arch",
+      "args": ["-x86_64", "bash", "-l"]
+    }
+  },
+  "terminal.integrated.defaultProfile.osx": "Rosetta bash",
+  "terminal.integrated.env.osx": {
+    "DOTNET_ROOT": "/usr/local/share/dotnet/x64",
+    "DOTNET_HOST_PATH": "/usr/local/share/dotnet/x64/dotnet",
+    "PATH": "/usr/local/share/dotnet/x64:${env:PATH}",
+    "PS1": "\\W/\\W \\$ "
   }
+}

@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <!-- Prevent MSBuild from invoking mgcb automatically -->
     <SkipContent>true</SkipContent>
   </PropertyGroup>
 </Project>

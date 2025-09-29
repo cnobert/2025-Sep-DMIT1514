@@ -10,7 +10,7 @@ Thumbs.db
 *.sln.docstates
 
 # VS Code - keep settings if you want them tracked; otherwise uncomment next line
-#.vscode/
+.vscode/
 
 # Build outputs - all projects
 **/bin/

@@ -1,11 +1,27 @@
 {
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 100,
+  "task.allowAutomaticTasks": "on",
+
   "terminal.integrated.profiles.osx": {
-    "Rosetta zsh": { "path": "arch", "args": ["-x86_64", "zsh", "-l"] }
+    "Rosetta bash": {
+      "path": "arch",
+      "args": [
+        "-x86_64",
+        "bash",
+        "--rcfile",
+        "${workspaceFolder}/.vscode/rosetta.bashrc",
+        "-i"
+      ]
+    }
   },
-  "terminal.integrated.defaultProfile.osx": "Rosetta zsh",
+  "terminal.integrated.defaultProfile.osx": "Rosetta bash",
+
   "terminal.integrated.env.osx": {
     "DOTNET_ROOT": "/usr/local/share/dotnet/x64",
     "DOTNET_HOST_PATH": "/usr/local/share/dotnet/x64/dotnet",
-    "PATH": "/usr/local/share/dotnet/x64:${env:PATH}"
+    "PATH": "/usr/local/share/dotnet/x64:${env:PATH}",
+    "PROMPT_DIRTRIM": "2",
+    "PS1": "[x86] \\w \\$ "
   }
 }
