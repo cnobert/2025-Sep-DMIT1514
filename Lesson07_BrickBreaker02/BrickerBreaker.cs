@@ -93,6 +93,8 @@ public class BrickBreaker : Game
     {
         KeyboardState kb = Keyboard.GetState();
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        #region Paddle
         if (kb.IsKeyDown(Keys.Left) || kb.IsKeyDown(Keys.A))
         {
             _paddlePosition.X -= _paddleSpeed * deltaTime;
@@ -112,6 +114,7 @@ public class BrickBreaker : Game
         {
             _paddlePosition.X = 0.0f;
         }
+        #endregion
 
         if (!_ballLaunched)
         {
@@ -123,7 +126,6 @@ public class BrickBreaker : Game
             {
                 _ballLaunched = true;
             }
-
         }
         else //ball is in play!
         {
@@ -172,6 +174,8 @@ public class BrickBreaker : Game
             }
             #endregion
             #region Brick collisions
+
+            //in assignment #1, this if statement will be in a loop
             if (_brickAlive && BallRectangle.Intersects(_brickRectangle))
             {
                 _brickAlive = false;
@@ -226,6 +230,7 @@ public class BrickBreaker : Game
         _spriteBatch.Draw(_pixel, PaddleRectangle, Color.Brown);
         _spriteBatch.Draw(_pixel, BallRectangle, Color.OrangeRed);
 
+        //in assignment #1, loop through the brick arrays here
         if (_brickAlive)
         {
             _spriteBatch.Draw(_pixel, _brickRectangle, _brickColour);
