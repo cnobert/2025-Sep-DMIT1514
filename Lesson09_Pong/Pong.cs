@@ -9,19 +9,17 @@ public class Pong : Game
     private const int _Scale = 4;
 
     private const int _WindowWidth = 250 * _Scale, _WindowHeight = 150 * _Scale;
+    
     private const int _BallWidthAndHeight = 3 * _Scale;
 
     private const int _PaddleWidth = 2 * _Scale, _PaddleHeight = 18 * _Scale;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _backgroundTexture;
 
     private Rectangle _playAreaBoundingBox;
 
-    // to keep track of the state of the ball
-    private Vector2 _ballDimensions, _ballPosition, _ballDirection;
-    private float _ballSpeed;
+    private Ball[] _balls;
 
     private Vector2 _paddleDimensions, _paddlePosition, _paddleDirection;
     private float _paddleSpeed;
@@ -44,10 +42,17 @@ public class Pong : Game
 
         _playAreaBoundingBox = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
 
-        _ballPosition = new Vector2(50 * _Scale, 65 * _Scale);
-        _ballSpeed = 100 * _Scale;
-        _ballDirection = new Vector2(-1, -1);
-        _ballDimensions = new Vector2(_BallWidthAndHeight, _BallWidthAndHeight);
+        _balls = new Ball[4];
+        for(int c = 0; c < 4; c++)
+        {
+            _balls[c] = new Ball();
+
+            Vector2 ballPosition = new Vector2(c+50 * _Scale, c+65 * _Scale);
+            float ballSpeed = 100 * _Scale;
+            Vector2 ballDirection = new Vector2(-1, -1);
+            Vector2 ballDimensions = new Vector2(_BallWidthAndHeight, _BallWidthAndHeight);
+            _balls[c].Initialize(ballPosition, ballSpeed, ballDirection, ballDimensions, _playAreaBoundingBox);
+        }
 
         _paddlePosition = new Vector2(210 * _Scale, 75 * _Scale);
         _paddleSpeed = 100 * _Scale;
@@ -63,27 +68,21 @@ public class Pong : Game
         // create a 1x1 white pixel we can stretch to draw rectangles
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+
+        foreach (Ball ball in _balls)
+        {
+            ball.LoadContent(GraphicsDevice);
+        }
+
     }
 
     protected override void Update(GameTime gameTime)
     {
-        #region ball movement
-        _ballPosition += _ballDirection * _ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        // bounce ball off left and right sides
-        if (_ballPosition.X <= _playAreaBoundingBox.Left || (_ballPosition.X + _ballDimensions.X) >= _playAreaBoundingBox.Right)
+        foreach (Ball ball in _balls)
         {
-            _ballDirection.X *= -1;
+            ball.Update(gameTime);
         }
-        // bounce ball off top and bottom
-        if
-        (
-            _ballPosition.Y <= (_playAreaBoundingBox.Top)
-            || (_ballPosition.Y + _ballDimensions.Y) >= (_playAreaBoundingBox.Bottom)
-        )
-        {
-            _ballDirection.Y *= -1;
-        }
-        #endregion
+
         #region paddle movement
 
         KeyboardState kbState = Keyboard.GetState();
@@ -120,14 +119,10 @@ public class Pong : Game
 
         _spriteBatch.Begin();
 
-        // draw ball as a stretched 1x1 pixel
-        Rectangle ballRect = new Rectangle(
-            (int)_ballPosition.X,
-            (int)_ballPosition.Y,
-            (int)_ballDimensions.X,
-            (int)_ballDimensions.Y
-        );
-        _spriteBatch.Draw(_pixel, ballRect, Color.White);
+        foreach (Ball ball in _balls)
+        {
+            ball.Draw(_spriteBatch);
+        }
 
         // draw paddle as a stretched 1x1 pixel
         Rectangle paddleRect = new Rectangle(
