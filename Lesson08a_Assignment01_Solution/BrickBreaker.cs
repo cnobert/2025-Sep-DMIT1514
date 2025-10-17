@@ -7,7 +7,7 @@ using System.IO; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
 using System.Collections; 
 using System.Collections.Generic;
 
-namespace Lesson08_BrickBreaker03;
+namespace Lesson08a_Assignment01_Solution;
 
 public class BrickBreaker : Game
 {
@@ -33,9 +33,11 @@ public class BrickBreaker : Game
     #endregion
 
     #region Ball
+    private Vector2 _ballPosition;
+    private Vector2 _ballVelocity;
+    private bool _ballLaunched = false; //this is our first game object state
     private const int _BallSize = 10;
-    private Ball _ball;
-
+    private const float _BallSpeed = 500;
     #endregion
 
     #region Bricks (parallel arrays)
@@ -47,6 +49,12 @@ public class BrickBreaker : Game
     private Rectangle[] _brickRectangles = new Rectangle[_BrickCount];
     private Color[] _brickColors = new Color[_BrickCount];
     private bool[] _brickAlive = new bool[_BrickCount];
+
+    private Vector2 _movingBrickPosition;
+    private Vector2 _movingBrickVelocity;
+    private Color _movingBrickColor;
+    private bool _movingBrickAlive = true;
+
 
     // Brick layout
     private const int _BrickWidth = 70;
@@ -108,7 +116,11 @@ public class BrickBreaker : Game
             _paddlePosition.Y - _BallSize - 5
         );
 
-        _ball.Initialize(ballPosition, _BallSize);
+        // Place ball above paddle
+        _ballPosition = new Vector2(
+            _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
+            _paddlePosition.Y - _BallSize - 5
+        );
         
         BuildLevel();
         ResetBallOnPaddle();
@@ -185,24 +197,40 @@ public class BrickBreaker : Game
             }
             #endregion
 
+            #region Moving Bricks
+            if (_movingBrickAlive)
+            {
+                _movingBrickPosition += _movingBrickVelocity * deltaTime;
+
+                if (_movingBrickPosition.X <= 0.0f)
+                {
+                    _movingBrickPosition.X = 0.0f;
+                    _movingBrickVelocity.X *= -1;
+                }
+                if (_movingBrickPosition.X + _BrickWidth >= _WindowWidth)
+                {
+                    _movingBrickPosition.X = _WindowWidth - _BrickWidth;
+                    _movingBrickVelocity.X *= -1;
+                }
+            }
+            #endregion
             #region Ball update
-            if (!_ball.Launched)
+            if (!_ballLaunched)
             {
                 // keep ball resting above paddle
-                _ball.Position = new Vector2(
-                        _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
-                        _paddlePosition.Y - _BallSize - 5
-                );
+                //keep ball resting above paddle
+                _ballPosition.X = _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2);
+                _ballPosition.Y = _paddlePosition.Y - _BallSize - 5;
 
                 if (_kbState.IsKeyDown(Keys.Space))
                 {
-                    _ball.Launched = true;
+                    _ballLaunched = true;
                 }
             }
             else
             {
-                _ball.Update(gameTime);
-                
+                _ballPosition += _ballVelocity * deltaTime;
+
 
                 #region Trail sample
                 _trailTimer += deltaTime;
@@ -221,16 +249,16 @@ public class BrickBreaker : Game
                 }
                 #endregion
 
-                #region Walls collisions
-                if (_ball.Position.X <= 0.0f)
+                #region collisions Ball with walls
+                if (_ballPosition.X <= 0.0f)
                 {
-                    _ball.Position = new Vector2(0.0f, _ball.Position.Y);
-                    _ball.Velocity = new Vector2(-1.0f, _ball.Velocity.Y);
+                    _ballPosition.X = 0.0f;
+                    _ballVelocity.X *= -1;
                 }
                 if (_ballPosition.X + _BallSize >= _WindowWidth)
                 {
                     _ballPosition.X = _WindowWidth - _BallSize;
-                    _ballVelocity.X *= -1.0f;
+                    _ballVelocity.X *= -1;
                 }
                 if (_ballPosition.Y <= 0.0f)
                 {
@@ -243,6 +271,8 @@ public class BrickBreaker : Game
                     _trail.Clear();
                 }
                 #endregion
+
+                
 
                 #region Paddle collisions
                 if (BallRectangle.Intersects(PaddleRectangle))
@@ -341,7 +371,10 @@ public class BrickBreaker : Game
                 _spriteBatch.Draw(_pixel, _brickRectangles[i], _brickColors[i]);
             }
         }
-
+        if (_movingBrickAlive)
+        {
+            _spriteBatch.Draw(_pixel, new Rectangle(_movingBrickPosition.ToPoint(), new Point(_BrickWidth, _BrickHeight)), _movingBrickColor);
+        }
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -372,6 +405,10 @@ public class BrickBreaker : Game
 
     private void BuildLevel()
     {
+        _movingBrickPosition = new Vector2(100, 300);
+        _movingBrickVelocity = new Vector2(250, 0);
+        _movingBrickColor = new Color(new Vector3(0, 255, 255));
+
         int index = 0;
 
         for (int row = 0; row < _BrickRows; row++)
@@ -415,7 +452,55 @@ public class BrickBreaker : Game
 
         for (int i = 0; i < _BrickCount; i++)
         {
-            if (_brickAlive[i])
+            if(_movingBrickAlive)
+            {
+                Rectangle r = new Rectangle(_movingBrickPosition.ToPoint(), new Point(_BrickWidth, _BrickHeight));
+                if (b.Intersects(r))
+                {
+                    float overlapLeft = b.Right - r.Left;
+                    float overlapRight = r.Right - b.Left;
+                    float overlapTop = b.Bottom - r.Top;
+                    float overlapBottom = r.Bottom - b.Top;
+
+                    float minXOverlap = Math.Min(overlapLeft, overlapRight);
+                    float minYOverlap = Math.Min(overlapTop, overlapBottom);
+
+                    if (minXOverlap < minYOverlap)
+                    {
+                        if (overlapLeft < overlapRight)
+                        {
+                            _ballPosition.X -= overlapLeft;
+                        }
+                        else
+                        {
+                            _ballPosition.X += overlapRight;
+                        }
+                        _ballVelocity.X *= -1.0f;
+                    }
+                    else
+                    {
+                        if (overlapTop < overlapBottom)
+                        {
+                            _ballPosition.Y -= overlapTop;
+                        }
+                        else
+                        {
+                            _ballPosition.Y += overlapBottom;
+                        }
+                        _ballVelocity.Y *= -1.0f;
+                    }
+
+                    _movingBrickAlive = false;
+
+                    // start background flash on hit
+                    _bgFlashTimer = _BgFlashDuration;
+
+                    // resolve only one brick per frame
+                    i = _BrickCount;
+                    
+                }
+            }
+            if (i < _BrickCount && _brickAlive[i])
             {
                 Rectangle r = _brickRectangles[i];
 
