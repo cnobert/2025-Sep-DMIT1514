@@ -8,8 +8,13 @@ public class Ball
     private Rectangle _gameBoundingBox;
     private Vector2 _dimensions, _position, _direction;
     private float _speed;
-    
+
     private Texture2D _pixel;
+    
+    internal Rectangle BoundingBox
+    {
+        get => new Rectangle((int)_position.X, (int)_position.Y, (int)_dimensions.X,(int)_dimensions.Y);
+    }
     internal void Initialize(Vector2 position, float speed, Vector2 direction, Vector2 dimensions, Rectangle gameBoundingBox)
     {
         _gameBoundingBox = gameBoundingBox;
@@ -45,13 +50,6 @@ public class Ball
     }
     internal void Draw(SpriteBatch spriteBatch)
     {
-        // draw ball as a stretched 1x1 pixel
-        Rectangle ballRect = new Rectangle(
-            (int)_position.X,
-            (int)_position.Y,
-            (int)_dimensions.X,
-            (int)_dimensions.Y
-        );
-        spriteBatch.Draw(_pixel, ballRect, Color.White);
+        spriteBatch.Draw(_pixel, BoundingBox, Color.White);
     }
 }

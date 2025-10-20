@@ -16,7 +16,10 @@ public class Paddle
     {
         set => _direction = value;
     }
-
+    internal Rectangle BoundingBox
+    {
+        get => new Rectangle((int)_position.X, (int)_position.Y, (int)_dimensions.X,(int)_dimensions.Y);
+    }
     internal void Initialize(Vector2 position, float speed, Vector2 dimensions, Rectangle gameBoundingBox)
     {
         _gameBoundingBox = gameBoundingBox;
@@ -47,13 +50,7 @@ public class Paddle
 
     internal void Draw(SpriteBatch spriteBatch)
     {
-        Rectangle ballRect = new Rectangle(
-            (int)_position.X,
-            (int)_position.Y,
-            (int)_dimensions.X,
-            (int)_dimensions.Y
-        );
-        spriteBatch.Draw(_pixel, ballRect, Color.White);
+        spriteBatch.Draw(_pixel, BoundingBox, Color.White);
     }
 
 }
