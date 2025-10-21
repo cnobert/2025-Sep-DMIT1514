@@ -21,7 +21,7 @@ public class Pong : Game
 
     private Ball[] _balls;
 
-    private Paddle _paddle;
+    private Paddle _paddleLeft, _paddleRight;
 
     public Pong()
     {
@@ -50,13 +50,16 @@ public class Pong : Game
             _balls[c].Initialize(ballPosition, ballSpeed, ballDirection, ballDimensions, _playAreaBoundingBox);
         }
 
-        _paddle = new Paddle();
+        _paddleLeft = new Paddle();
+        _paddleRight = new Paddle();
 
-        Vector2 paddlePosition = new Vector2(210 * _Scale, 75 * _Scale);
+        Vector2 paddleLeftPosition = new Vector2(10 * _Scale, 75 * _Scale);
+        Vector2 paddleRightPosition = new Vector2(210 * _Scale, 75 * _Scale);
         float paddleSpeed = 100 * _Scale;
         Vector2 paddleDimensions = new Vector2(_PaddleWidth, _PaddleHeight);
 
-        _paddle.Initialize(paddlePosition, paddleSpeed, paddleDimensions, _playAreaBoundingBox);
+        _paddleLeft.Initialize(paddleLeftPosition, paddleSpeed, paddleDimensions, _playAreaBoundingBox);
+        _paddleRight.Initialize(paddleRightPosition, paddleSpeed, paddleDimensions, _playAreaBoundingBox);
 
         base.Initialize();
     }
@@ -69,32 +72,51 @@ public class Pong : Game
         {
             ball.LoadContent(GraphicsDevice);
         }
-        _paddle.LoadContent(GraphicsDevice);
-
+        _paddleLeft.LoadContent(GraphicsDevice);
+        _paddleRight.LoadContent(GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        #region keyboard input to move paddles
+        KeyboardState kbState = Keyboard.GetState();
+        if (kbState.IsKeyDown(Keys.W))
+        {
+            _paddleLeft.Direction = new Vector2(0, -1);
+        }
+        else if (kbState.IsKeyDown(Keys.S))
+        {
+            _paddleLeft.Direction = new Vector2(0, 1);
+        }
+        else
+        {
+            _paddleLeft.Direction = new Vector2(0, 0);
+        }
+
+        if (kbState.IsKeyDown(Keys.Up))
+        {
+            _paddleRight.Direction = new Vector2(0, -1);
+        }
+        else if (kbState.IsKeyDown(Keys.Down))
+        {
+            _paddleRight.Direction = new Vector2(0, 1);
+        }
+        else
+        {
+            _paddleRight.Direction = new Vector2(0, 0);
+        }
+        #endregion
         foreach (Ball ball in _balls)
         {
             ball.Update(gameTime);
         }
-
-        KeyboardState kbState = Keyboard.GetState();
-        if (kbState.IsKeyDown(Keys.W))
+        _paddleLeft.Update(gameTime);
+        _paddleRight.Update(gameTime);
+        foreach(Ball ball in _balls)
         {
-            _paddle.Direction = new Vector2(0, -1);
+            ball.ProcessCollision(_paddleLeft.BoundingBox);
+            ball.ProcessCollision(_paddleRight.BoundingBox);
         }
-        else if (kbState.IsKeyDown(Keys.S))
-        {
-            _paddle.Direction = new Vector2(0, 1);
-        }
-        else
-        {
-            _paddle.Direction = new Vector2(0, 0);
-        }
-
-        _paddle.Update(gameTime);
 
         base.Update(gameTime);
     }
@@ -109,7 +131,8 @@ public class Pong : Game
         {
             ball.Draw(_spriteBatch);
         }
-        _paddle.Draw(_spriteBatch);
+        _paddleLeft.Draw(_spriteBatch);
+        _paddleRight.Draw(_spriteBatch);
 
         _spriteBatch.End();
 

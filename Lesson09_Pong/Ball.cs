@@ -5,9 +5,12 @@ namespace Lesson09_Pong;
 
 public class Ball
 {
+    private const int _CollisionTimerInterval = 400;
     private Rectangle _gameBoundingBox;
     private Vector2 _dimensions, _position, _direction;
     private float _speed;
+
+    private int _collisionTimerMillis = 0;
 
     private Texture2D _pixel;
     
@@ -31,6 +34,7 @@ public class Ball
     }
     internal void Update(GameTime gameTime)
     {
+        _collisionTimerMillis += gameTime.ElapsedGameTime.Milliseconds;
         _position += _direction * _speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         // bounce ball off left and right sides
@@ -52,4 +56,28 @@ public class Ball
     {
         spriteBatch.Draw(_pixel, BoundingBox, Color.White);
     }
+
+    internal bool ProcessCollision(Rectangle otherBoundingBox)
+    {
+        bool didCollide = false;
+        if(_collisionTimerMillis >= _CollisionTimerInterval && BoundingBox.Intersects(otherBoundingBox))
+        {
+            _collisionTimerMillis = 0;
+            didCollide = true;
+            Rectangle intersection = Rectangle.Intersect(BoundingBox, otherBoundingBox);
+            if(intersection.Width > intersection.Height)
+            {
+                //this is a horizontal rectangle, therefore it's a top
+                //or bottom collision
+                _direction.Y *= -1;
+            }
+            else
+            {
+                //this is a vertical rectangle, therefore it's a side collision
+                _direction.X *= -1;
+            }
+        }
+        return didCollide;
+    }
+
 }
