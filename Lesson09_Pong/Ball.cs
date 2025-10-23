@@ -37,6 +37,7 @@ public class Ball
         _collisionTimerMillis += gameTime.ElapsedGameTime.Milliseconds;
         _position += _direction * _speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+        
         // bounce ball off left and right sides
         if (_position.X <= _gameBoundingBox.Left || (_position.X + _dimensions.X) >= _gameBoundingBox.Right)
         {
