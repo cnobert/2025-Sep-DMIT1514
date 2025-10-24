@@ -12,7 +12,7 @@ public class Ball
     private int _size;
     private float _speed;
     private bool _launched;
-    private Rectangle _playAreaBoundingBox;
+    private Rectangle _gameBoundingBox;
     private Random _rng = new Random();
     #endregion
 
@@ -26,8 +26,6 @@ public class Ball
     #region Properties
     public Vector2 Position { get { return _position; } set { _position = value; } }
     public Vector2 Velocity { get { return _velocity; } set { _velocity = value; } }
-    public int Size { get { return _size; } }
-    public float Speed { get { return _speed; } }
     public bool Launched { get { return _launched; } set { _launched = value; } }
     
     public Rectangle BoundingBox
@@ -46,7 +44,7 @@ public class Ball
         _speed = speed;
         _velocity = Vector2.Zero;
         _launched = false;
-        _playAreaBoundingBox = playAreaBoundingBox;
+        _gameBoundingBox = playAreaBoundingBox;
         _trail.Clear();
         _trailTimer = 0.0f;
     }
@@ -59,21 +57,21 @@ public class Ball
         {
             _position += _velocity * dt;
 
-            if (_position.X <= _playAreaBoundingBox.Left)
+            if (_position.X <= _gameBoundingBox.Left)
             {
-                _position.X = _playAreaBoundingBox.Left;
+                _position.X = _gameBoundingBox.Left;
                 _velocity.X *= -1.0f;
             }
 
-            if (_position.X + _size >= _playAreaBoundingBox.Right)
+            if (_position.X + _size >= _gameBoundingBox.Right)
             {
-                _position.X = _playAreaBoundingBox.Right - _size;
+                _position.X = _gameBoundingBox.Right - _size;
                 _velocity.X *= -1.0f;
             }
 
-            if (_position.Y <= _playAreaBoundingBox.Top)
+            if (_position.Y <= _gameBoundingBox.Top)
             {
-                _position.Y = _playAreaBoundingBox.Top;
+                _position.Y = _gameBoundingBox.Top;
                 _velocity.Y *= -1.0f;
             }
 
@@ -128,7 +126,7 @@ public class Ball
         _position = new Vector2(x, y);
     }
 
-    public void LaunchRandomUp()
+    public void Launch()
     {
         float dirX = _rng.Next(2) == 0 ? -0.9f : 0.9f;
         Vector2 dir = new Vector2(dirX, -1.0f);
@@ -147,6 +145,10 @@ public class Ball
         _velocity = direction * _speed;
     }
 
+    public bool OutsideOfBounds()
+    {
+        return !BoundingBox.Intersects(_gameBoundingBox);
+    }
     public void BounceX()
     {
         _velocity.X *= -1.0f;
@@ -157,23 +159,76 @@ public class Ball
         _velocity.Y *= -1.0f;
     }
 
-    public void CollideWith(Rectangle theRectangle)
+    public bool CollideWith(Rectangle theRectangle)
     {
-        bool collided = BoundingBox.Intersects(theRectangle);
+        bool didHit = false;
 
-        if (collided)
+        if (BoundingBox.Intersects(theRectangle))
         {
-            _position.Y = theRectangle.Y - _size;
-            BounceY();
+            didHit = true;
 
-            float hitRatio = (
-                (_position.X + _size / 2.0f) -
-                (theRectangle.X + theRectangle.Width / 2.0f)
-            ) / (theRectangle.Width / 2.0f);
+            Rectangle overlap = Rectangle.Intersect(BoundingBox, theRectangle);
 
-            hitRatio = MathHelper.Clamp(hitRatio, -1.0f, 1.0f);
-            Vector2 newDir = new Vector2(hitRatio, -1.0f);
-            SetDirectionNormalized(newDir);
+            // Decide if it's a vertical or horizontal hit
+            if (overlap.Width < overlap.Height)
+            {
+                // Left or right side
+                if (BoundingBox.Center.X < theRectangle.Center.X)
+                {
+                    // Hit brick’s left side
+                    _position.X -= overlap.Width;
+                }
+                else
+                {
+                    // Hit brick’s right side
+                    _position.X += overlap.Width;
+                }
+                BounceX();
+            }
+            else
+            {
+                // Top or bottom
+                if (BoundingBox.Center.Y < theRectangle.Center.Y)
+                {
+                    // Hit brick’s top
+                    _position.Y -= overlap.Height;
+                }
+                else
+                {
+                    // Hit brick’s bottom
+                    _position.Y += overlap.Height;
+                }
+                BounceY();
+            }
+        }
+        return didHit;
+    }
+    public void BounceOffTopAccordingToImpactLocation(Rectangle surfaceRect, float minVertical = 0.35f)
+    {
+        // Snap the ball directly above the surface
+        _position.Y = surfaceRect.Y - _size;
+
+        // Reverse vertical velocity
+        BounceY();
+
+        // Compute where the ball struck relative to the rectangle's horizontal center
+        float surfaceCenterX = surfaceRect.X + (surfaceRect.Width / 2.0f);
+        float ballCenterX = _position.X + (_size / 2.0f);
+        float hitRatio = (ballCenterX - surfaceCenterX) / (surfaceRect.Width / 2.0f);
+
+        // Clamp ratio to [-1, 1]
+        hitRatio = MathHelper.Clamp(hitRatio, -1.0f, 1.0f);
+
+        // Create a new direction using hit ratio for X, always up for Y
+        Vector2 newDir = new Vector2(hitRatio, -1.0f);
+        SetDirectionNormalized(newDir);
+
+        // Enforce a minimum vertical component so bounce isn’t too flat
+        Vector2 dir = _velocity / _speed;
+        if (MathF.Abs(dir.Y) < minVertical)
+        {
+            dir.Y = -minVertical;
+            SetDirectionNormalized(dir);
         }
     }
 }

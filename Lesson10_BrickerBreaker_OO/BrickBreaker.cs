@@ -37,24 +37,24 @@ public class BrickBreaker : Game
     private const int _BallSize = 10;
     private const float _BallSpeed = 320.0f;
     private Ball _ball;
-    #endregion
 
-    #region Bricks
-    private const int _BrickRows = 5;
-    private const int _BrickCols = 10;
-    private const int _BrickCount = _BrickRows * _BrickCols;
+    #endregion
 
     private Rectangle[] _brickRectangles = new Rectangle[_BrickCount];
     private Color[] _brickColors = new Color[_BrickCount];
     private bool[] _brickAlive = new bool[_BrickCount];
 
-    // Layout
+    #region Brick constants
     private const int _BrickWidth = 70;
     private const int _BrickHeight = 24;
     private const int _BrickTopOffset = 70;
     private const int _BrickLeftOffset = 20;
     private const int _BrickHorizontalGap = 10;
     private const int _BrickVerticalGap = 8;
+
+    private const int _BrickRows = 5;
+    private const int _BrickCols = 10;
+    private const int _BrickCount = _BrickRows * _BrickCols;
     #endregion
 
     #region Derived Properties
@@ -94,15 +94,15 @@ public class BrickBreaker : Game
 
         _paddlePosition = new Vector2((_WindowWidth - _PaddleWidth) / 2, _WindowHeight - 50);
 
-        Vector2 ballStart = new Vector2(
+        Vector2 ballStartPosition = new Vector2(
             _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
             _paddlePosition.Y - _BallSize - 5
         );
 
-        Rectangle playfield = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
+        Rectangle gameAreaBoundingBox = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
 
         _ball = new Ball();
-        _ball.Initialize(ballStart, _BallSize, _BallSpeed, playfield);
+        _ball.Initialize(ballStartPosition, _BallSize, _BallSpeed, gameAreaBoundingBox);
 
         BuildLevel();
         ResetBallOnPaddle();
@@ -185,19 +185,22 @@ public class BrickBreaker : Game
 
                 if (_kbState.IsKeyDown(Keys.Space))
                 {
-                    _ball.LaunchRandomUp();
+                    _ball.Launch();
                 }
             }
             else
             {
                 _ball.Update(gameTime);
 
-                if (_ball.Position.Y > 1.2f * _WindowHeight) //add 20% to _WindowHeight as a buffer to avoid early resets
+                if (_ball.OutsideOfBounds()) //add 20% to _WindowHeight as a buffer to avoid early resets
                 {
                     ResetBallOnPaddle();
                 }
 
-                _ball.CollideWith(PaddleBounds);
+                if(_ball.CollideWith(PaddleBounds))
+                {
+                    _ball.BounceOffTopAccordingToImpactLocation(PaddleBounds);
+                }
                 ResolveBrickCollision();
             }
 
@@ -273,60 +276,15 @@ public class BrickBreaker : Game
 
     private void ResolveBrickCollision()
     {
-        Rectangle b = _ball.BoundingBox;
-
         for (int i = 0; i < _BrickCount; i++)
         {
             if (_brickAlive[i])
             {
-                Rectangle r = _brickRectangles[i];
-
-                if (b.Intersects(r))
+                if (_ball.CollideWith(_brickRectangles[i]))
                 {
-                    float overlapLeft = b.Right - r.Left;
-                    float overlapRight = r.Right - b.Left;
-                    float overlapTop = b.Bottom - r.Top;
-                    float overlapBottom = r.Bottom - b.Top;
-
-                    float minXOverlap = Math.Min(overlapLeft, overlapRight);
-                    float minYOverlap = Math.Min(overlapTop, overlapBottom);
-
-                    if (minXOverlap < minYOverlap)
-                    {
-                        if (overlapLeft < overlapRight)
-                        {
-                            Vector2 p = _ball.Position;
-                            p.X -= overlapLeft;
-                            _ball.Position = p;
-                        }
-                        else
-                        {
-                            Vector2 p = _ball.Position;
-                            p.X += overlapRight;
-                            _ball.Position = p;
-                        }
-                        _ball.BounceX();
-                    }
-                    else
-                    {
-                        if (overlapTop < overlapBottom)
-                        {
-                            Vector2 p = _ball.Position;
-                            p.Y -= overlapTop;
-                            _ball.Position = p;
-                        }
-                        else
-                        {
-                            Vector2 p = _ball.Position;
-                            p.Y += overlapBottom;
-                            _ball.Position = p;
-                        }
-                        _ball.BounceY();
-                    }
-
                     _brickAlive[i] = false;
                     _bgFlashTimer = _BgFlashDuration;
-                    i = _BrickCount;
+                    i = _BrickCount; // exit after first collision
                 }
             }
         }
