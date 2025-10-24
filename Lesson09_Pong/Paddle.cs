@@ -52,5 +52,4 @@ public class Paddle
     {
         spriteBatch.Draw(_pixel, BoundingBox, Color.White);
     }
-
 }
