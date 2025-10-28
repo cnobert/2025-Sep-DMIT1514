@@ -27,19 +27,15 @@ public class BrickBreaker : Game
     private bool _paused = false;
     #endregion
 
-    #region Paddle
     private const int _PaddleWidth = 120, _PaddleHeight = 18;
     private const float _PaddleSpeed = 400;
     private Paddle _paddle;
-    
-    #endregion
 
-    #region Ball
     private const int _BallSize = 10;
     private const float _BallSpeed = 320.0f;
     private Ball _ball;
 
-    #endregion
+    private HUD _hud;
 
     private Rectangle[] _brickRectangles = new Rectangle[_BrickCount];
     private Color[] _brickColors = new Color[_BrickCount];
@@ -92,11 +88,14 @@ public class BrickBreaker : Game
 
         _paddle = new Paddle();
         _paddle.Initialize(paddleStartPosition, new Vector2(_PaddleWidth, _PaddleHeight), _PaddleSpeed, Color.Brown, gameAreaBoundingBox);
-        
+
         BuildLevel();
         ResetBallOnPaddle(_paddle);
 
         base.Initialize();
+        //base.Initialize() calls LoadContent, so _font is no longer null
+        _hud = new HUD();
+        _hud.Initialize(new Vector2(10, 10), _font, Color.White);
     }
 
     protected override void LoadContent()
@@ -182,13 +181,23 @@ public class BrickBreaker : Game
                     ResetBallOnPaddle(_paddle);
                 }
 
-                if(_ball.CollideWith(_paddle.BoundingBox))
+                if (_ball.CollideWith(_paddle.BoundingBox))
                 {
                     _ball.BounceOffTopAccordingToImpactLocation(_paddle.BoundingBox);
                 }
                 ResolveBrickCollision();
             }
 
+            int numBricksAlive = 0;
+            foreach (bool brickAlive in _brickAlive)
+            {
+                if (brickAlive)
+                {
+                    numBricksAlive++;
+                }
+            }
+            _hud.BricksRemaining = numBricksAlive;
+            
             base.Update(gameTime);
         }
     }
@@ -198,6 +207,8 @@ public class BrickBreaker : Game
         GraphicsDevice.Clear(Color.DarkBlue);
 
         _spriteBatch.Begin();
+
+        _hud.Draw(_spriteBatch);
 
         _ball.Draw(_spriteBatch, _pixel, Color.OrangeRed, new Color(255, 180, 120));
         
