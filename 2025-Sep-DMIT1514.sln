@@ -18,8 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lesson06_BrickBreaker01", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lesson07_BrickBreaker02", "Lesson07_BrickBreaker02\Lesson07_BrickBreaker02.csproj", "{466DD843-4FFC-4C97-8B1A-D6175BA41525}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lesson08_BrickerBreaker03", "Lesson08_BrickerBreaker03\Lesson08_BrickerBreaker03.csproj", "{39513910-50A3-4F50-B251-045954F852CA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lesson08a_Assignment01_Solution", "Lesson08a_Assignment01_Solution\Lesson08a_Assignment01_Solution.csproj", "{4ABE5B42-D071-466A-BAAC-512A79021A9A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lesson09_Pong", "Lesson09_Pong\Lesson09_Pong.csproj", "{74F83282-8DD0-4D95-975A-7C0B432E1F13}"
@@ -69,10 +67,6 @@ Global
 		{466DD843-4FFC-4C97-8B1A-D6175BA41525}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{466DD843-4FFC-4C97-8B1A-D6175BA41525}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{466DD843-4FFC-4C97-8B1A-D6175BA41525}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39513910-50A3-4F50-B251-045954F852CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39513910-50A3-4F50-B251-045954F852CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39513910-50A3-4F50-B251-045954F852CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39513910-50A3-4F50-B251-045954F852CA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4ABE5B42-D071-466A-BAAC-512A79021A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4ABE5B42-D071-466A-BAAC-512A79021A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ABE5B42-D071-466A-BAAC-512A79021A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU

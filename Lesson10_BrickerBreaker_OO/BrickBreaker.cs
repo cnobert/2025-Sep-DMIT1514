@@ -28,9 +28,10 @@ public class BrickBreaker : Game
     #endregion
 
     #region Paddle
-    private Vector2 _paddlePosition;
-    private float _paddleSpeed = 400.0f;
     private const int _PaddleWidth = 120, _PaddleHeight = 18;
+    private const float _PaddleSpeed = 400;
+    private Paddle _paddle;
+    
     #endregion
 
     #region Ball
@@ -57,21 +58,6 @@ public class BrickBreaker : Game
     private const int _BrickCount = _BrickRows * _BrickCols;
     #endregion
 
-    #region Derived Properties
-    private Rectangle PaddleBounds
-    {
-        get
-        {
-            return new Rectangle(
-                (int)_paddlePosition.X,
-                (int)_paddlePosition.Y,
-                _PaddleWidth,
-                _PaddleHeight
-            );
-        }
-    }
-    #endregion
-
     #region Background Flash
     private readonly Color _bgBaseColor = Color.DarkGreen;
     private readonly Color _bgFlashColor = new Color(0, 0, 0);
@@ -92,11 +78,11 @@ public class BrickBreaker : Game
         _graphics.PreferredBackBufferHeight = _WindowHeight;
         _graphics.ApplyChanges();
 
-        _paddlePosition = new Vector2((_WindowWidth - _PaddleWidth) / 2, _WindowHeight - 50);
+        Vector2 paddleStartPosition = new Vector2((_WindowWidth - _PaddleWidth) / 2, _WindowHeight - 50);
 
         Vector2 ballStartPosition = new Vector2(
-            _paddlePosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
-            _paddlePosition.Y - _BallSize - 5
+            paddleStartPosition.X + (_PaddleWidth / 2) - (_BallSize / 2),
+            paddleStartPosition.Y - _BallSize - 5
         );
 
         Rectangle gameAreaBoundingBox = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
@@ -104,8 +90,11 @@ public class BrickBreaker : Game
         _ball = new Ball();
         _ball.Initialize(ballStartPosition, _BallSize, _BallSpeed, gameAreaBoundingBox);
 
+        _paddle = new Paddle();
+        _paddle.Initialize(paddleStartPosition, new Vector2(_PaddleWidth, _PaddleHeight), _PaddleSpeed, Color.Brown, gameAreaBoundingBox);
+        
         BuildLevel();
-        ResetBallOnPaddle();
+        ResetBallOnPaddle(_paddle);
 
         base.Initialize();
     }
@@ -116,6 +105,8 @@ public class BrickBreaker : Game
 
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+
+        _paddle.LoadContent(GraphicsDevice);
 
         #region ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
         byte[] fontBytes = File.ReadAllBytes("Content/Tahoma.ttf");
@@ -156,32 +147,26 @@ public class BrickBreaker : Game
                     _bgFlashTimer = 0.0f;
                 }
             }
-
             // Paddle
             if (_kbState.IsKeyDown(Keys.Left) || _kbState.IsKeyDown(Keys.A))
             {
-                _paddlePosition.X -= _paddleSpeed * deltaTime;
+                _paddle.Move(-1);
+            }
+            else if (_kbState.IsKeyDown(Keys.Right) || _kbState.IsKeyDown(Keys.D))
+            {
+                _paddle.Move(1);
+            }
+            else
+            {
+                _paddle.Move(0);
             }
 
-            if (_kbState.IsKeyDown(Keys.Right) || _kbState.IsKeyDown(Keys.D))
-            {
-                _paddlePosition.X += _paddleSpeed * deltaTime;
-            }
-
-            if (_paddlePosition.X > _WindowWidth - _PaddleWidth)
-            {
-                _paddlePosition.X = _WindowWidth - _PaddleWidth;
-            }
-
-            if (_paddlePosition.X < 0.0f)
-            {
-                _paddlePosition.X = 0.0f;
-            }
+            _paddle.Update(gameTime);
 
             // Ball
             if (!_ball.Launched)
             {
-                _ball.CentreOn(PaddleBounds);
+                _ball.CentreOn(_paddle.BoundingBox);
 
                 if (_kbState.IsKeyDown(Keys.Space))
                 {
@@ -194,12 +179,12 @@ public class BrickBreaker : Game
 
                 if (_ball.OutsideOfBounds()) //add 20% to _WindowHeight as a buffer to avoid early resets
                 {
-                    ResetBallOnPaddle();
+                    ResetBallOnPaddle(_paddle);
                 }
 
-                if(_ball.CollideWith(PaddleBounds))
+                if(_ball.CollideWith(_paddle.BoundingBox))
                 {
-                    _ball.BounceOffTopAccordingToImpactLocation(PaddleBounds);
+                    _ball.BounceOffTopAccordingToImpactLocation(_paddle.BoundingBox);
                 }
                 ResolveBrickCollision();
             }
@@ -215,7 +200,8 @@ public class BrickBreaker : Game
         _spriteBatch.Begin();
 
         _ball.Draw(_spriteBatch, _pixel, Color.OrangeRed, new Color(255, 180, 120));
-        _spriteBatch.Draw(_pixel, PaddleBounds, Color.Brown);
+        
+        _paddle.Draw(_spriteBatch);
 
         for (int i = 0; i < _BrickCount; i++)
         {
@@ -235,11 +221,11 @@ public class BrickBreaker : Game
         base.Draw(gameTime);
     }
 
-    private void ResetBallOnPaddle()
+    private void ResetBallOnPaddle(Paddle paddle)
     {
         _ball.Launched = false;
         _ball.ClearTrail();
-        _ball.CentreOn(PaddleBounds);
+        _ball.CentreOn(paddle.BoundingBox);
     }
 
     private bool Pressed(Keys key)
