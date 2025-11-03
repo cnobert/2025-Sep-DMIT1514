@@ -1,6 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using SpriteFontPlus; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
+using System.IO; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Lesson09_Pong;
 
@@ -23,6 +28,19 @@ public class Pong : Game
 
     private Paddle _paddleLeft, _paddleRight;
 
+    private SpriteFont _font;
+    private enum GameState
+    {
+        Start,
+        Playing,
+        End
+    }
+    private GameState _state = GameState.Start;
+
+    //just to illustrate tracking *some* game data that will end the game
+    //in Brick Breaker, this would be bricks remaining and lives remaining
+    private int _leftPaddleHits = 0, _rightPaddleHits = 0;
+    private string _message;
     public Pong()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -61,6 +79,10 @@ public class Pong : Game
         _paddleLeft.Initialize(paddleLeftPosition, paddleSpeed, paddleDimensions, _playAreaBoundingBox);
         _paddleRight.Initialize(paddleRightPosition, paddleSpeed, paddleDimensions, _playAreaBoundingBox);
 
+        _state = GameState.Start;
+        _leftPaddleHits = 0;
+        _rightPaddleHits = 0;
+        _message = "Welcome to Pong, press space to begin.";
         base.Initialize();
     }
 
@@ -74,49 +96,84 @@ public class Pong : Game
         }
         _paddleLeft.LoadContent(GraphicsDevice);
         _paddleRight.LoadContent(GraphicsDevice);
+        byte[] fontBytes = File.ReadAllBytes("Content/Tahoma.ttf");
+        _font = TtfFontBaker.Bake(
+                    fontBytes,
+                    18,
+                    1024,
+                    1024,
+                    new[] { CharacterRange.BasicLatin })
+                .CreateSpriteFont(GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
     {
-        #region keyboard input to move paddles
         KeyboardState kbState = Keyboard.GetState();
-        if (kbState.IsKeyDown(Keys.W))
+        switch(_state)
         {
-            _paddleLeft.Direction = new Vector2(0, -1);
-        }
-        else if (kbState.IsKeyDown(Keys.S))
-        {
-            _paddleLeft.Direction = new Vector2(0, 1);
-        }
-        else
-        {
-            _paddleLeft.Direction = new Vector2(0, 0);
-        }
+            case GameState.Start:
+                if(kbState.IsKeyDown(Keys.Space))
+                {
+                    _state = GameState.Playing;
+                }
+                break;
+            case GameState.Playing:
+                #region keyboard input to move paddles
+                
+                if (kbState.IsKeyDown(Keys.W))
+                {
+                    _paddleLeft.Direction = new Vector2(0, -1);
+                }
+                else if (kbState.IsKeyDown(Keys.S))
+                {
+                    _paddleLeft.Direction = new Vector2(0, 1);
+                }
+                else
+                {
+                    _paddleLeft.Direction = new Vector2(0, 0);
+                }
 
-        if (kbState.IsKeyDown(Keys.Up))
-        {
-            _paddleRight.Direction = new Vector2(0, -1);
+                if (kbState.IsKeyDown(Keys.Up))
+                {
+                    _paddleRight.Direction = new Vector2(0, -1);
+                }
+                else if (kbState.IsKeyDown(Keys.Down))
+                {
+                    _paddleRight.Direction = new Vector2(0, 1);
+                }
+                else
+                {
+                    _paddleRight.Direction = new Vector2(0, 0);
+                }
+                #endregion
+                foreach (Ball ball in _balls)
+                {
+                    ball.Update(gameTime);
+                }
+                _paddleLeft.Update(gameTime);
+                _paddleRight.Update(gameTime);
+                foreach (Ball ball in _balls)
+                {
+                    if (ball.ProcessCollision(_paddleLeft.BoundingBox))
+                    {
+                        _leftPaddleHits++;
+                    }
+                    if (ball.ProcessCollision(_paddleRight.BoundingBox))
+                    {
+                        _rightPaddleHits++;
+                    }
+                }
+                if(_leftPaddleHits > 5 || _rightPaddleHits > 5)
+                {
+                    _state = GameState.End;
+                    _message = $"Game Over, Left hit the ball {_leftPaddleHits} times and"
+                                + $" right hit the ball {_rightPaddleHits} times."; 
+                }
+                break;
+            case GameState.End:
+                break;
         }
-        else if (kbState.IsKeyDown(Keys.Down))
-        {
-            _paddleRight.Direction = new Vector2(0, 1);
-        }
-        else
-        {
-            _paddleRight.Direction = new Vector2(0, 0);
-        }
-        #endregion
-        foreach (Ball ball in _balls)
-        {
-            ball.Update(gameTime);
-        }
-        _paddleLeft.Update(gameTime);
-        _paddleRight.Update(gameTime);
-        foreach(Ball ball in _balls)
-        {
-            ball.ProcessCollision(_paddleLeft.BoundingBox);
-            ball.ProcessCollision(_paddleRight.BoundingBox);
-        }
+        
 
         base.Update(gameTime);
     }
@@ -127,12 +184,24 @@ public class Pong : Game
 
         _spriteBatch.Begin();
 
-        foreach (Ball ball in _balls)
+        switch(_state)
         {
-            ball.Draw(_spriteBatch);
+            case GameState.Start:
+                _spriteBatch.DrawString(_font, _message, new Vector2(10, 10), Color.White);
+                break;
+            case GameState.Playing:
+                foreach (Ball ball in _balls)
+                {
+                    ball.Draw(_spriteBatch);
+                }
+                _paddleLeft.Draw(_spriteBatch);
+                _paddleRight.Draw(_spriteBatch);
+                break;
+            case GameState.End:
+                _spriteBatch.DrawString(_font, _message, new Vector2(10, 10), Color.White);
+                break;
         }
-        _paddleLeft.Draw(_spriteBatch);
-        _paddleRight.Draw(_spriteBatch);
+        
 
         _spriteBatch.End();
 
