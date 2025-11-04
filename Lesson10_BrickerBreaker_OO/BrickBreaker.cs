@@ -1,15 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 using SpriteFontPlus; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
 using System.IO; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
-using System.Collections;
-using System.Collections.Generic;
-
-
 
 namespace Lesson10_BrickerBreaker_OO;
+
 public class BrickBreaker : Game
 {
     private const int _WindowWidth = 840, _WindowHeight = 600;
@@ -40,6 +36,8 @@ public class BrickBreaker : Game
     private Rectangle[] _brickRectangles = new Rectangle[_BrickCount];
     private Color[] _brickColors = new Color[_BrickCount];
     private bool[] _brickAlive = new bool[_BrickCount];
+
+    private ParticleSystem _particles;
 
     #region Brick constants
     private const int _BrickWidth = 70;
@@ -92,6 +90,8 @@ public class BrickBreaker : Game
         BuildLevel();
         ResetBallOnPaddle(_paddle);
 
+        _particles = new ParticleSystem();
+
         base.Initialize();
         //base.Initialize() calls LoadContent, so _font is no longer null
         _hud = new HUD();
@@ -123,7 +123,7 @@ public class BrickBreaker : Game
     {
         _kbPreviousState = _kbState;
         _kbState = Keyboard.GetState();
-
+        _particles.Update(gameTime);
         if (Pressed(Keys.Tab))
         {
             _showDebug = !_showDebug;
@@ -207,7 +207,7 @@ public class BrickBreaker : Game
         GraphicsDevice.Clear(Color.DarkBlue);
 
         _spriteBatch.Begin();
-
+        _particles.Draw(_spriteBatch, _pixel);
         _hud.Draw(_spriteBatch);
 
         _ball.Draw(_spriteBatch, _pixel, Color.OrangeRed, new Color(255, 180, 120));
@@ -281,6 +281,7 @@ public class BrickBreaker : Game
                 {
                     _brickAlive[i] = false;
                     _bgFlashTimer = _BgFlashDuration;
+                    _particles.SpawnExplosion(_brickRectangles[i].Center.ToVector2(), _brickColors[i], 100);
                     i = _BrickCount; // exit after first collision
                 }
             }
