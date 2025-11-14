@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -41,6 +41,20 @@ public class MosquitoAttackGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        KeyboardState kbState = Keyboard.GetState();
+        if(kbState.IsKeyDown(Keys.A))
+        {
+            _cannon.Direction = new Vector2(-1, 0);
+        }
+        else if(kbState.IsKeyDown(Keys.D))
+        {
+            _cannon.Direction = new Vector2(1, 0);
+        }
+        else
+        {
+            _cannon.Direction = Vector2.Zero;
+        }
+
         _cannon.Update(gameTime);
         base.Update(gameTime);
     }

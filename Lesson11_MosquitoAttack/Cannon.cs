@@ -8,8 +8,12 @@ namespace Lesson11_MosquitoAttack;
 
 public class Cannon
 {
+    private const float _MaxSpeed = 50;
+
     private SimpleAnimation _animation;
-    private Vector2 _position;
+    private Vector2 _position, _direction;
+
+    internal Vector2 Direction { set => _direction = value; }
 
     internal void Initialize(Vector2 position)
     {
@@ -18,13 +22,24 @@ public class Cannon
     internal void LoadContent(ContentManager content)
     {
         Texture2D texture = content.Load<Texture2D>("Cannon");
-        _animation = new SimpleAnimation(texture, texture.Width / 4, texture.Height, 4, 8.0f);
+        _animation = new SimpleAnimation(texture, texture.Width / 4, texture.Height, 4, 2f);
         _animation.Paused = false;
     }
     internal void Update(GameTime gameTime)
     {
-        
-        _animation.Update(gameTime);
+        _position += _direction * _MaxSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if(_direction.X != 0)
+        {
+            if(_direction.X == -1)
+            {
+                _animation.Reverse = true;
+            }
+            else
+            {
+                _animation.Reverse = false;
+            }
+            _animation.Update(gameTime);
+        }
     }
     internal void Draw(SpriteBatch spriteBatch)
     {
