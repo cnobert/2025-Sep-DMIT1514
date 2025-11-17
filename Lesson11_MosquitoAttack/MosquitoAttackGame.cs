@@ -8,11 +8,13 @@ public class MosquitoAttackGame : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+
     private const int _WindowWidth = 550;
     private const int _WindowHeight = 400;
 
     private Texture2D _background;
     private Cannon _cannon;
+    private Mosquito _mosquito;
 
     public MosquitoAttackGame()
     {
@@ -26,8 +28,20 @@ public class MosquitoAttackGame : Game
         _graphics.PreferredBackBufferWidth = _WindowWidth;
         _graphics.PreferredBackBufferHeight = _WindowHeight;
         _graphics.ApplyChanges();
+
         _cannon = new Cannon();
-        _cannon.Initialize(new Vector2(50, 325), new Rectangle(0, 0, _WindowWidth, _WindowHeight));
+        _cannon.Initialize(
+            new Vector2(50, 325),
+            new Rectangle(0, 0, _WindowWidth, _WindowHeight)
+        );
+
+        _mosquito = new Mosquito();
+        _mosquito.Initialize(
+            new Vector2(300, 50),
+            new Rectangle(0, 0, _WindowWidth, _WindowHeight)
+        );
+        _mosquito.Direction = new Vector2(-1, 0);
+
         base.Initialize();
     }
 
@@ -37,16 +51,18 @@ public class MosquitoAttackGame : Game
 
         _background = Content.Load<Texture2D>("Background");
         _cannon.LoadContent(Content);
+        _mosquito.LoadContent(Content);
     }
 
     protected override void Update(GameTime gameTime)
     {
         KeyboardState kbState = Keyboard.GetState();
-        if(kbState.IsKeyDown(Keys.A))
+
+        if (kbState.IsKeyDown(Keys.A))
         {
             _cannon.Direction = new Vector2(-1, 0);
         }
-        else if(kbState.IsKeyDown(Keys.D))
+        else if (kbState.IsKeyDown(Keys.D))
         {
             _cannon.Direction = new Vector2(1, 0);
         }
@@ -56,6 +72,8 @@ public class MosquitoAttackGame : Game
         }
 
         _cannon.Update(gameTime);
+        _mosquito.Update(gameTime);
+
         base.Update(gameTime);
     }
 
@@ -65,7 +83,10 @@ public class MosquitoAttackGame : Game
 
         _spriteBatch.Begin();
         _spriteBatch.Draw(_background, Vector2.Zero, Color.White);
+
         _cannon.Draw(_spriteBatch);
+        _mosquito.Draw(_spriteBatch);
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
