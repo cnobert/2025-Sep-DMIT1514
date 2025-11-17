@@ -20,6 +20,19 @@ public class SimpleAnimation
     // Play animation backwards
     public bool Reverse { get; set; } = false;
 
+    internal Vector2 FrameDimensions
+    {
+        get
+        {
+            Vector2 dimensions = Vector2.Zero;
+            if(_frames != null)
+            {
+                dimensions = _frames[0].Size.ToVector2();
+            }
+            return dimensions;
+        }
+    }
+
     public SimpleAnimation(Texture2D texture, int frameWidth, int frameHeight, int frameCount, float framesPerSecond)
     {
         _texture = texture;
