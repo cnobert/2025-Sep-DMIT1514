@@ -61,10 +61,12 @@ public class Mosquito
         if (BoundingBox.Left < _gameBoundingBox.Left)
         {
             _direction.X *= -1;
+            _animation.Reverse = false;
         }
         else if (BoundingBox.Right > _gameBoundingBox.Right)
         {
             _direction.X *= -1;
+            _animation.Reverse = true;
         }
         _animation.Update(gameTime);
 
