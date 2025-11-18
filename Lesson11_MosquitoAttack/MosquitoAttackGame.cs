@@ -14,6 +14,7 @@ public class MosquitoAttackGame : Game
     private const int _WindowHeight = 400;
 
     private Texture2D _background;
+    
     private Cannon _cannon;
     private Mosquito[] _mosquitoes;
 
@@ -34,13 +35,13 @@ public class MosquitoAttackGame : Game
 
         _random = new Random();
 
+        Rectangle gameBounds = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
+
         _cannon = new Cannon();
         _cannon.Initialize(
             new Vector2(50, 325),
-            new Rectangle(0, 0, _WindowWidth, _WindowHeight)
+            gameBounds
         );
-
-        Rectangle gameBounds = new Rectangle(0, 0, _WindowWidth, _WindowHeight);
 
         _mosquitoes = new Mosquito[10];
 
@@ -59,7 +60,7 @@ public class MosquitoAttackGame : Game
             Vector2 dir = new Vector2(dirX, dirY);
 
             dir.Normalize();
-            
+
             m.Direction = dir;
             _mosquitoes[i] = m;
         }
@@ -72,6 +73,7 @@ public class MosquitoAttackGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         _background = Content.Load<Texture2D>("Background");
+
         _cannon.LoadContent(Content);
 
         foreach (Mosquito m in _mosquitoes)
@@ -79,7 +81,7 @@ public class MosquitoAttackGame : Game
             m.LoadContent(Content);
         }
     }
-
+    KeyboardState kbPreviousState;
     protected override void Update(GameTime gameTime)
     {
         KeyboardState kbState = Keyboard.GetState();
@@ -97,13 +99,17 @@ public class MosquitoAttackGame : Game
             _cannon.Direction = Vector2.Zero;
         }
 
+        if(kbState.IsKeyDown(Keys.Space) && kbPreviousState.IsKeyUp(Keys.Space))
+        {
+            _cannon.Shoot();
+        }
         _cannon.Update(gameTime);
 
         foreach (Mosquito m in _mosquitoes)
         {
             m.Update(gameTime);
         }
-
+        kbPreviousState = kbState;
         base.Update(gameTime);
     }
 
