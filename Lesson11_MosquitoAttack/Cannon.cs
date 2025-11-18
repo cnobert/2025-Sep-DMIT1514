@@ -1,9 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Lesson11_MosquitoAttack;
 
@@ -17,6 +14,7 @@ public class Cannon
     private Rectangle _gameBoundingBox;
 
     internal Vector2 Direction { set => _direction = value; }
+    
     public Rectangle BoundingBox
     {
         get

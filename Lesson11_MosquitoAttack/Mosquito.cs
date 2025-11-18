@@ -3,23 +3,17 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Lesson11_MosquitoAttack;
+
 public class Mosquito
 {
     private const float _MaxSpeed = 120f;
 
     private SimpleAnimation _animation;
-    private Vector2 _position;
-    private Vector2 _direction;
+    private Vector2 _position, _direction;
 
     private Rectangle _gameBoundingBox;
 
-    internal Vector2 Direction
-    {
-        set
-        {
-            _direction = value;
-        }
-    }
+    internal Vector2 Direction { set => _direction = value; }
 
     public Rectangle BoundingBox
     {
