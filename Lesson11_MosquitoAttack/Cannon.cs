@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Diagnostics;
 
 namespace Lesson11_MosquitoAttack;
 
@@ -102,6 +104,7 @@ public class Cannon
         int cannonBallIndex = 0;
         while(cannonBallIndex < _NumCannonBalls)
         {
+            //Console.WriteLine(cannonBallIndex);
             if(_cannonBalls[cannonBallIndex].Shootable())
             {
                  //the cannonball is not quite centered on the barrel of the Cannon
@@ -111,6 +114,7 @@ public class Cannon
                 //I found one that I can shoot! Don't forget to exit the loop.
                 cannonBallIndex = _NumCannonBalls;
             }
+            cannonBallIndex++;
         }
     }
 }
