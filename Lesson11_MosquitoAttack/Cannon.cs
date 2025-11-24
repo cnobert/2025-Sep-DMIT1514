@@ -7,13 +7,14 @@ namespace Lesson11_MosquitoAttack;
 public class Cannon
 {
     private const float _MaxSpeed = 250;
+    private const int _NumCannonBalls = 10;
 
     private SimpleAnimation _animation;
     private Vector2 _position, _direction;
 
     private Rectangle _gameBoundingBox;
 
-    private CannonBall _cannonBall;
+    private CannonBall [] _cannonBalls;
 
     internal Vector2 Direction { set => _direction = value; }
 
@@ -33,8 +34,13 @@ public class Cannon
     {
         _position = position;
         _gameBoundingBox = gameBoundingBox;
-        _cannonBall = new CannonBall();
-        _cannonBall.Initialize(new Vector2(100, 275), gameBoundingBox, new Vector2(0, -1));
+
+        _cannonBalls = new CannonBall[_NumCannonBalls];
+        for(int c = 0; c < _NumCannonBalls; c++)
+        {
+            _cannonBalls[c] = new CannonBall();
+            _cannonBalls[c].Initialize(gameBoundingBox);
+        }        
     }
     
     internal void LoadContent(ContentManager content)
@@ -42,7 +48,10 @@ public class Cannon
         Texture2D texture = content.Load<Texture2D>("Cannon");
         _animation = new SimpleAnimation(texture, texture.Width / 4, texture.Height, 4, 2f);
         _animation.Paused = false;
-        _cannonBall.LoadContent(content);
+        foreach(CannonBall c in _cannonBalls)
+        {
+            c.LoadContent(content);
+        }
     }
     internal void Update(GameTime gameTime)
     {
@@ -70,7 +79,11 @@ public class Cannon
         {
             _position.X = _gameBoundingBox.Right - BoundingBox.Width;
         }
-        _cannonBall.Update(gameTime);
+        foreach(CannonBall c in _cannonBalls)
+        {
+            c.Update(gameTime);
+        }
+        
     }
     internal void Draw(SpriteBatch spriteBatch)
     {
@@ -78,11 +91,26 @@ public class Cannon
         {
             _animation.Draw(spriteBatch, _position, SpriteEffects.None);
         }
-        _cannonBall.Draw(spriteBatch);
+        foreach(CannonBall c in _cannonBalls)
+        {
+            c.Draw(spriteBatch);
+        }
     }
 
     internal void Shoot()
     {
-        _cannonBall.Shoot(new Vector2(BoundingBox.Center.X, BoundingBox.Top), new Vector2(0, -1));
+        int cannonBallIndex = 0;
+        while(cannonBallIndex < _NumCannonBalls)
+        {
+            if(_cannonBalls[cannonBallIndex].Shootable())
+            {
+                 //the cannonball is not quite centered on the barrel of the Cannon
+                //this is left for you to figure out in the assignment
+                _cannonBalls[cannonBallIndex].Shoot(new Vector2(BoundingBox.Center.X, BoundingBox.Top), new Vector2(0, -1));
+
+                //I found one that I can shoot! Don't forget to exit the loop.
+                cannonBallIndex = _NumCannonBalls;
+            }
+        }
     }
 }

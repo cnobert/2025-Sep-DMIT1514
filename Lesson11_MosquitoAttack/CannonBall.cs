@@ -22,11 +22,9 @@ public class CannonBall
     {
         get => new Rectangle((int)_position.X, (int)_position.Y, (int)_dimensions.X,(int)_dimensions.Y);
     }
-    internal void Initialize(Vector2 position, Rectangle gameBoundingBox, Vector2 direction)
+    internal void Initialize(Rectangle gameBoundingBox)
     {
-        _position = position;
         _gameBoundingBox = gameBoundingBox;
-        _velocity = direction * _Speed;
         _state = State.NotFlying;
     }
     internal void LoadContent(ContentManager content)
@@ -36,10 +34,16 @@ public class CannonBall
     }
     internal void Update(GameTime gameTime)
     {
+        //in-class exercise:
+        //make the cannon reload itself once it has left the screen
         switch(_state)
         {
             case State.Flying:
                 _position += _velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if(!BoundingBox.Intersects(_gameBoundingBox))
+                {
+                    _state = State.NotFlying;
+                }
                 break;
             case State.NotFlying:
                 break;
@@ -58,8 +62,15 @@ public class CannonBall
     }
     internal void Shoot(Vector2 position, Vector2 direction)
     {
-        _position = position;
-        _velocity = _Speed * direction;
-        _state = State.Flying;
+        if(_state == State.NotFlying)
+        {
+            _position = position;
+            _velocity = _Speed * direction;
+            _state = State.Flying;
+        }
+    }
+    internal bool Shootable()
+    {
+        return _state == State.NotFlying;
     }
 }
