@@ -146,6 +146,7 @@ public class MosquitoAttackGame : Game
                     }
                     //!!!! count mosquitoes that are alive - if they're all gone, set the message appropriately and move to State.Over
                     //!!!! check if cannon is dead - if so, do the same
+                    
                 }
                 break;
             case State.Start:
@@ -163,10 +164,10 @@ public class MosquitoAttackGame : Game
             case State.Over:
                  if(Pressed(Keys.Space))
                 {
+                    //!!!!! call Initialize here to start the game afresh
                     _gameState = State.Level01;
                 }
                 break;
-
         }
         
         _kbPreviousState = _kbState;
