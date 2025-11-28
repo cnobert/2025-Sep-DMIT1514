@@ -60,11 +60,13 @@ public class CannonBall
                 break;
         }
     }
+    //we will assume that the position is "unadjusted" 
     internal void Shoot(Vector2 position, Vector2 direction)
     {
         if(_state == State.NotFlying)
         {
-            _position = position;
+            //adjust the position by half the width and height of the dimensions
+            _position = position - _dimensions / 2f;
             _velocity = _Speed * direction;
             _state = State.Flying;
         }
@@ -72,5 +74,15 @@ public class CannonBall
     internal bool Shootable()
     {
         return _state == State.NotFlying;
+    }
+    internal bool ProcessCollision(Rectangle boundingBox)
+    {
+        bool hit = false;
+        if(_state == State.Flying && BoundingBox.Intersects(boundingBox))
+        {
+            hit = true;
+            _state = State.NotFlying;
+        }
+        return hit;
     }
 }

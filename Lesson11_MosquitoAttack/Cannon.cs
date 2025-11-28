@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Lesson11_MosquitoAttack;
 
@@ -116,5 +117,16 @@ public class Cannon
             }
             cannonBallIndex++;
         }
+    }
+    internal bool ProcessCollision(Rectangle boundingBox)
+    {
+        bool hit = false;
+        int c = 0;
+        while(!hit && c < _cannonBalls.Length)
+        {
+            hit = _cannonBalls[c].ProcessCollision(boundingBox);
+            c++;
+        }
+        return hit;
     }
 }

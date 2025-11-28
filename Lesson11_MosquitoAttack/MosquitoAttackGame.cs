@@ -105,9 +105,13 @@ public class MosquitoAttackGame : Game
         }
         _cannon.Update(gameTime);
 
-        foreach (Mosquito m in _mosquitoes)
+        foreach (Mosquito mosquito in _mosquitoes)
         {
-            m.Update(gameTime);
+            mosquito.Update(gameTime);
+            if(mosquito.IsAlive && _cannon.ProcessCollision(mosquito.BoundingBox))
+            {
+                mosquito.Die();
+            }
         }
         kbPreviousState = kbState;
         base.Update(gameTime);
