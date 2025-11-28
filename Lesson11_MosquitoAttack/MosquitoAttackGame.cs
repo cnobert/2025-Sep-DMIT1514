@@ -1,7 +1,10 @@
-﻿using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
+using SpriteFontPlus; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
+using System.IO; //ONLY CONRAD NEEDS THIS CODE (MACOS THINGS)
+
 
 namespace Lesson11_MosquitoAttack;
 
@@ -14,11 +17,20 @@ public class MosquitoAttackGame : Game
     private const int _WindowHeight = 400;
 
     private Texture2D _background;
+
+
+    private enum State
+    {
+        Level01, Start, Paused, Over
+    }
+    private State _gameState;
     
     private Cannon _cannon;
     private Mosquito[] _mosquitoes;
 
     private Random _random;
+    private SpriteFont _font;
+    private string _message;
 
     public MosquitoAttackGame()
     {
@@ -64,7 +76,8 @@ public class MosquitoAttackGame : Game
             m.Direction = dir;
             _mosquitoes[i] = m;
         }
-
+        _gameState = State.Start;
+        _message = "Welcome to Mosquito Attack. Press space to play.";
         base.Initialize();
     }
 
@@ -76,44 +89,87 @@ public class MosquitoAttackGame : Game
 
         _cannon.LoadContent(Content);
 
+        byte[] fontBytes = File.ReadAllBytes("Content/Tahoma.ttf");
+        _font = TtfFontBaker.Bake(
+                    fontBytes,
+                    18,
+                    1024,
+                    1024,
+                    new[] { CharacterRange.BasicLatin })
+                .CreateSpriteFont(GraphicsDevice);
+
         foreach (Mosquito m in _mosquitoes)
         {
             m.LoadContent(Content);
         }
     }
-    KeyboardState kbPreviousState;
+    KeyboardState _kbPreviousState;
+    KeyboardState _kbState;
     protected override void Update(GameTime gameTime)
     {
-        KeyboardState kbState = Keyboard.GetState();
+        _kbState = Keyboard.GetState();
 
-        if (kbState.IsKeyDown(Keys.A))
+        switch(_gameState)
         {
-            _cannon.Direction = new Vector2(-1, 0);
-        }
-        else if (kbState.IsKeyDown(Keys.D))
-        {
-            _cannon.Direction = new Vector2(1, 0);
-        }
-        else
-        {
-            _cannon.Direction = Vector2.Zero;
-        }
+            
+            case State.Level01:
+                if(Pressed(Keys.P))
+                {
+                    _gameState = State.Paused;
+                    _message = "Game paused. Press P to resume.";
+                }
+                if (_kbState.IsKeyDown(Keys.A))
+                {
+                    _cannon.Direction = new Vector2(-1, 0);
+                }
+                else if (_kbState.IsKeyDown(Keys.D))
+                {
+                    _cannon.Direction = new Vector2(1, 0);
+                }
+                else
+                {
+                    _cannon.Direction = Vector2.Zero;
+                }
 
-        if(kbState.IsKeyDown(Keys.Space) && kbPreviousState.IsKeyUp(Keys.Space))
-        {
-            _cannon.Shoot();
-        }
-        _cannon.Update(gameTime);
+                if(_kbState.IsKeyDown(Keys.Space) && _kbPreviousState.IsKeyUp(Keys.Space))
+                {
+                    _cannon.Shoot();
+                }
+                _cannon.Update(gameTime);
 
-        foreach (Mosquito mosquito in _mosquitoes)
-        {
-            mosquito.Update(gameTime);
-            if(mosquito.IsAlive && _cannon.ProcessCollision(mosquito.BoundingBox))
-            {
-                mosquito.Die();
-            }
+                foreach (Mosquito mosquito in _mosquitoes)
+                {
+                    mosquito.Update(gameTime);
+                    if(mosquito.IsAlive && _cannon.ProcessCollision(mosquito.BoundingBox))
+                    {
+                        mosquito.Die();
+                    }
+                    //!!!! count mosquitoes that are alive - if they're all gone, set the message appropriately and move to State.Over
+                    //!!!! check if cannon is dead - if so, do the same
+                }
+                break;
+            case State.Start:
+                if(Pressed(Keys.Space))
+                {
+                    _gameState = State.Level01;
+                }
+                break;
+            case State.Paused:
+                if(Pressed(Keys.P))
+                {
+                    _gameState = State.Level01;
+                }
+                break;
+            case State.Over:
+                 if(Pressed(Keys.Space))
+                {
+                    _gameState = State.Level01;
+                }
+                break;
+
         }
-        kbPreviousState = kbState;
+        
+        _kbPreviousState = _kbState;
         base.Update(gameTime);
     }
 
@@ -122,17 +178,33 @@ public class MosquitoAttackGame : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin();
-        _spriteBatch.Draw(_background, Vector2.Zero, Color.White);
-
-        _cannon.Draw(_spriteBatch);
-
-        foreach (Mosquito m in _mosquitoes)
+        switch(_gameState)
         {
-            m.Draw(_spriteBatch);
+            case State.Level01:
+                _spriteBatch.Draw(_background, Vector2.Zero, Color.White);
+                _cannon.Draw(_spriteBatch);
+
+                foreach (Mosquito m in _mosquitoes)
+                {
+                    m.Draw(_spriteBatch);
+                }
+                break;
+            case State.Start:
+            case State.Paused:
+            case State.Over:
+                _spriteBatch.DrawString(_font, _message, Vector2.Zero, Color.White);
+                break;
+
         }
+        
+       
 
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+    private bool Pressed(Keys key)
+    {
+        return _kbState.IsKeyDown(key) && _kbPreviousState.IsKeyUp(key);
     }
 }
