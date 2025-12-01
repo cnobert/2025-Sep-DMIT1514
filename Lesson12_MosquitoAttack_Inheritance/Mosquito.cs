@@ -11,9 +11,8 @@ public class Mosquito
     private const float _DyingDuration = 1f;
     private const int _UpperRandomFiringRange = 500;
     private const int _NumFireBalls = 10;
-    //////////////////CHANGED///////////////
-    private const float _SwoopDuration = 1.0f;
-    //////////////////CHANGED///////////////
+
+    private const float _SwoopDuration = 2.0f;
 
     private SimpleAnimation _animation, _poofAnimation;
 
@@ -25,11 +24,9 @@ public class Mosquito
     private Random randomNumberGenerator = new Random();
     private FireBall[] _fireBalls;
 
-    //////////////////CHANGED///////////////
     private float _timeUntilNextSwoop;
     private float _swoopElapsed;
     private bool _isSwooping;
-    //////////////////CHANGED///////////////
 
     private enum State { Alive, Dying, Dead }
     private State _state;
@@ -60,12 +57,10 @@ public class Mosquito
         _gameBoundingBox = gameBoundingBox;
         _state = State.Alive;
 
-        //////////////////CHANGED///////////////
         _direction.Y = 0f;
         _timeUntilNextSwoop = GetRandomSwoopDelay();
         _swoopElapsed = 0f;
         _isSwooping = false;
-        //////////////////CHANGED///////////////
 
         _fireBalls = new FireBall[_NumFireBalls];
         for(int c = 0; c < _NumFireBalls; c++)
@@ -99,7 +94,7 @@ public class Mosquito
         switch(_state)
         {
             case State.Alive:
-                //////////////////CHANGED///////////////
+#region swooping
                 if (_isSwooping)
                 {
                     _swoopElapsed += deltaTime;
@@ -130,7 +125,7 @@ public class Mosquito
                         _swoopElapsed = 0f;
                     }
                 }
-                //////////////////CHANGED///////////////
+#endregion
 
                 _position += _direction * _MaxSpeed * deltaTime;
 

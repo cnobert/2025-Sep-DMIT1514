@@ -6,11 +6,13 @@ namespace Lesson12_MosquitoAttack_Inheritance;
 
 public class CannonBall
 {
+    private const float _Speed = 100;
+    
     private Texture2D _texture;
+
     private Vector2 _position, _velocity, _dimensions;
     private Rectangle _gameBoundingBox;
-    private const float _Speed = 100;
-
+    
     private enum State
     {
         Flying,
@@ -34,18 +36,10 @@ public class CannonBall
     }
     internal void Update(GameTime gameTime)
     {
-        //in-class exercise:
-        //make the cannon reload itself once it has left the screen
         switch(_state)
         {
             case State.Flying:
                 _position += _velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                
-                //commenting out because now Cannon reloads manually
-                // if(!BoundingBox.Intersects(_gameBoundingBox))
-                // {
-                //     _state = State.NotFlying;
-                // }
                 break;
             case State.NotFlying:
                 break;
@@ -79,7 +73,11 @@ public class CannonBall
     }
     internal void MakeShootable()
     {
-        _state = State.NotFlying;
+        if(!BoundingBox.Intersects(_gameBoundingBox))
+        {
+            _state = State.NotFlying;
+        }
+
     }
     internal bool ProcessCollision(Rectangle boundingBox)
     {

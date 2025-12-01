@@ -4,21 +4,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Lesson12_MosquitoAttack_Inheritance;
 
-public class FireBall
+public class FireBall : Projectile
 {
     private const float _Speed = 100;
     
     private SimpleAnimation _animation;
-
-    private Vector2 _position, _velocity, _dimensions;
-    private Rectangle _gameBoundingBox;
-    
-    protected enum State
-    {
-        Flying,
-        NotFlying
-    }
-    protected State _state = State.NotFlying;
 
     internal Rectangle BoundingBox
     {
@@ -28,16 +18,9 @@ public class FireBall
         }
     }
 
-    internal void Initialize(Rectangle gameBoundingBox)
-    {
-        _gameBoundingBox = gameBoundingBox;
-        _state = State.NotFlying;
-    }
-
     internal void LoadContent(ContentManager content)
     {
         Texture2D texture = content.Load<Texture2D>("FireBall");
-        
         _animation = new SimpleAnimation(texture, 5, texture.Height, texture.Width / 5, 8f);
     }
 
@@ -46,16 +29,15 @@ public class FireBall
         switch(_state)
         {
             case State.Flying:
-                _position += _velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if(!BoundingBox.Intersects(_gameBoundingBox))
                 {
                     _state = State.NotFlying;
                 }
+                _animation.Update(gameTime);
                 break;
             case State.NotFlying:
                 break;
         }
-        _animation.Update(gameTime);
     }
     internal void Draw(SpriteBatch spriteBatch)
     {
