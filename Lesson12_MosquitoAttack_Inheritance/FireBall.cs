@@ -1,0 +1,96 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace Lesson12_MosquitoAttack_Inheritance;
+
+public class FireBall
+{
+    private const float _Speed = 100;
+    
+    private SimpleAnimation _animation;
+
+    private Vector2 _position, _velocity, _dimensions;
+    private Rectangle _gameBoundingBox;
+    
+    protected enum State
+    {
+        Flying,
+        NotFlying
+    }
+    protected State _state = State.NotFlying;
+
+    internal Rectangle BoundingBox
+    {
+        get
+        {
+            return new Rectangle((int)_position.X, (int)_position.Y, (int)_animation.FrameDimensions.X, (int)_animation.FrameDimensions.Y);
+        }
+    }
+
+    internal void Initialize(Rectangle gameBoundingBox)
+    {
+        _gameBoundingBox = gameBoundingBox;
+        _state = State.NotFlying;
+    }
+
+    internal void LoadContent(ContentManager content)
+    {
+        Texture2D texture = content.Load<Texture2D>("FireBall");
+        
+        _animation = new SimpleAnimation(texture, 5, texture.Height, texture.Width / 5, 8f);
+    }
+
+    internal void Update(GameTime gameTime)
+    {
+        switch(_state)
+        {
+            case State.Flying:
+                _position += _velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if(!BoundingBox.Intersects(_gameBoundingBox))
+                {
+                    _state = State.NotFlying;
+                }
+                break;
+            case State.NotFlying:
+                break;
+        }
+        _animation.Update(gameTime);
+    }
+    internal void Draw(SpriteBatch spriteBatch)
+    {
+        switch(_state)
+        {
+            case State.Flying:
+                _animation.Draw(spriteBatch, _position, SpriteEffects.None);
+                break;
+            case State.NotFlying:
+                break;
+        }
+    }
+
+    internal void Shoot(Vector2 position, Vector2 direction)
+    {
+        if(_state == State.NotFlying)
+        {
+            //adjust the position by half the width and height of the dimensions
+            _position = position - _dimensions / 2f;
+            _velocity = _Speed * direction;
+            _state = State.Flying;
+        }
+    }
+    internal bool Shootable()
+    {
+        return _state == State.NotFlying;
+    }
+    internal bool ProcessCollision(Rectangle boundingBox)
+    {
+        bool hit = false;
+        if(_state == State.Flying && BoundingBox.Intersects(boundingBox))
+        {
+            hit = true;
+            _state = State.NotFlying;
+        }
+        return hit;
+    }
+}
