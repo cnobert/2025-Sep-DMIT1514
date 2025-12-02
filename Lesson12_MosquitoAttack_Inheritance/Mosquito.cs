@@ -7,7 +7,7 @@ namespace Lesson12_MosquitoAttack_Inheritance;
 
 public class Mosquito
 {
-    private const float _MaxSpeed = 120f;
+    private const float _MaxSpeed = 120f, _FireBallSpeed = 100;
     private const float _DyingDuration = 1f;
     private const int _UpperRandomFiringRange = 500;
     private const int _NumFireBalls = 10;
@@ -192,7 +192,7 @@ public class Mosquito
                  //the cannonball is not quite centered on the barrel of the Cannon
                 //this is left for you to figure out in the assignment
                 Vector2 shootingPosition = new Vector2(BoundingBox.Center.X, BoundingBox.Bottom);
-                _fireBalls[fireBallIndex].Shoot(shootingPosition, direction);
+                _fireBalls[fireBallIndex].Shoot(shootingPosition, direction, _FireBallSpeed);
 
                 //I found one that I can shoot! Don't forget to exit the loop.
                 fireBallIndex = _NumFireBalls;

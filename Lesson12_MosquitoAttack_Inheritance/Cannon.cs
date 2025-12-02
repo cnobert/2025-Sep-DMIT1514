@@ -7,8 +7,8 @@ namespace Lesson12_MosquitoAttack_Inheritance;
 
 public class Cannon
 {
-    private const float _MaxSpeed = 250;
-    private const int _NumCannonBalls = 10;
+    private const float _MaxSpeed = 250, _CannonBallSpeed = 100;
+    private const int _NumCannonBalls = 5;
     private const float _DyingDuration = 1f;
 
     private SimpleAnimation _animation, _poofAnimation;
@@ -19,7 +19,7 @@ public class Cannon
 
     private Rectangle _gameBoundingBox;
 
-    private CannonBall [] _cannonBalls;
+    private Projectile [] _projectiles;
 
     internal Vector2 Direction { set => _direction = value; }
     
@@ -54,12 +54,21 @@ public class Cannon
         _position = position;
         _gameBoundingBox = gameBoundingBox;
 
-        _cannonBalls = new CannonBall[_NumCannonBalls];
-        for(int c = 0; c < _NumCannonBalls; c++)
+        _projectiles = new Projectile[_NumCannonBalls];
+        _projectiles[0] = new CannonBall();
+        _projectiles[1] = new FireBall();
+        _projectiles[2] = new FireBall();
+        _projectiles[3] = new CannonBall();
+        _projectiles[4] = new CannonBall();
+        foreach(Projectile p in _projectiles)
         {
-            _cannonBalls[c] = new CannonBall();
-            _cannonBalls[c].Initialize(gameBoundingBox);
-        }        
+            p.Initialize(gameBoundingBox);
+        }
+        // for(int c = 0; c < _NumCannonBalls; c++)
+        // {
+        //     _projectiles[c] = new CannonBall();
+        //     _projectiles[c].Initialize(gameBoundingBox);
+        // }        
     }
     
     internal void LoadContent(ContentManager content)
@@ -74,9 +83,9 @@ public class Cannon
         _animation = new SimpleAnimation(texture, frameWidth, texture.Height, frameCount, 2f);
 
         _animation.Paused = false;
-        foreach(CannonBall c in _cannonBalls)
+        foreach(Projectile p in _projectiles)
         {
-            c.LoadContent(content);
+            p.LoadContent(content);
         }
 
         Texture2D poofTexture = content.Load<Texture2D>("Poof");
@@ -129,10 +138,10 @@ public class Cannon
                 break;
         }
         _noCannonBalls = true;
-        foreach(CannonBall c in _cannonBalls)
+        foreach(Projectile p in _projectiles)
         {
-            c.Update(gameTime);
-            if(c.Shootable())
+            p.Update(gameTime);
+            if(p.Shootable())
             {
                 _noCannonBalls = false;
             }
@@ -145,9 +154,9 @@ public class Cannon
         {
             _animation.Draw(spriteBatch, _position, SpriteEffects.None);
         }
-        foreach(CannonBall c in _cannonBalls)
+        foreach(Projectile p in _projectiles)
         {
-            c.Draw(spriteBatch);
+            p.Draw(spriteBatch);
         }
     }
 
@@ -157,11 +166,12 @@ public class Cannon
         while(cannonBallIndex < _NumCannonBalls)
         {
             //Console.WriteLine(cannonBallIndex);
-            if(_cannonBalls[cannonBallIndex].Shootable())
+            if(_projectiles[cannonBallIndex].Shootable())
             {
                  //the cannonball is not quite centered on the barrel of the Cannon
                 //this is left for you to figure out in the assignment
-                _cannonBalls[cannonBallIndex].Shoot(new Vector2(BoundingBox.Center.X, BoundingBox.Top), new Vector2(0, -1));
+                _projectiles[cannonBallIndex].Shoot
+                    (new Vector2(BoundingBox.Center.X, BoundingBox.Top), new Vector2(0, -1), _CannonBallSpeed);
 
                 //I found one that I can shoot! Don't forget to exit the loop.
                 cannonBallIndex = _NumCannonBalls;
@@ -173,9 +183,9 @@ public class Cannon
     {
         bool hit = false;
         int c = 0;
-        while(!hit && c < _cannonBalls.Length)
+        while(!hit && c < _projectiles.Length)
         {
-            hit = _cannonBalls[c].ProcessCollision(boundingBox);
+            hit = _projectiles[c].ProcessCollision(boundingBox);
             c++;
         }
         return hit;
@@ -188,16 +198,15 @@ public class Cannon
             _state = State.Dying;
             _dyingTimer = 0;
             _poofAnimation.Paused = false;
-            _animation = _poofAnimation;
-            
+            _animation = _poofAnimation;   
         }
     }
 
     internal void Reload()
     {
-        foreach(CannonBall cannonBall in _cannonBalls)
+        foreach(Projectile p in _projectiles)
         {
-            cannonBall.MakeShootable();
+            p.MakeShootable();
         }
     }
 }
