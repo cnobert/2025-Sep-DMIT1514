@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Lesson12_MosquitoAttack_Inheritance;
 
-public class CannonBall
+public class CannonBall : Projectile
 {
     private const float _Speed = 100;
     

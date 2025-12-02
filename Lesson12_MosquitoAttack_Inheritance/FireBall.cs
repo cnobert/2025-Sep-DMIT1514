@@ -24,8 +24,11 @@ public class FireBall : Projectile
         _animation = new SimpleAnimation(texture, 5, texture.Height, texture.Width / 5, 8f);
     }
 
-    internal void Update(GameTime gameTime)
+    //"override" means "I know what I'm doing, I'm hiding the parent method".
+    internal override void Update(GameTime gameTime)
     {
+        //"base" = the parent of the object that this code is running in
+        base.Update(gameTime);
         switch(_state)
         {
             case State.Flying:
@@ -39,7 +42,8 @@ public class FireBall : Projectile
                 break;
         }
     }
-    internal void Draw(SpriteBatch spriteBatch)
+
+    internal override void Draw(SpriteBatch spriteBatch)
     {
         switch(_state)
         {
