@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
-namespace Lesson12_MosquitoAttack_Inheritance;
+namespace Lesson13_Platforms;
 
 public class SimpleAnimation
 {
@@ -107,5 +107,11 @@ public class SimpleAnimation
             effects,
             0f
         );
+    }
+    internal void Reset()
+    {
+        Looping = true;
+        Paused = false;
+        Reverse = false;
     }
 }
