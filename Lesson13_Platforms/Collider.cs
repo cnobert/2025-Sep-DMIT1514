@@ -65,14 +65,28 @@ public class Collider
             switch (_type)
             {
                 case ColliderType.Left:
+                    //is the player moving rightwards?
+                    if(player.Velocity.X > 0)
+                    {
+                        player.MoveHorizontally(0);
+                    }
                     break;
                 case ColliderType.Right:
+                    //is the player moving leftwards?
+                    if(player.Velocity.X < 0)
+                    {
+                        player.MoveHorizontally(0);
+                    }
                     break;
                 case ColliderType.Top:
                     player.Land(BoundingBox);
                     player.StandOn(BoundingBox, dt);
                     break;
                 case ColliderType.Bottom:
+                    if(player.Velocity.Y < 0)
+                    {
+                        player.MoveVertically(0);
+                    }
                     break;
             }
         }

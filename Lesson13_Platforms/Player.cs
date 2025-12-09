@@ -7,7 +7,8 @@ namespace Lesson13_Platforms;
 
 public class Player
 {
-    private const int Speed = 150;
+    private const int _Speed = 150;
+    private const int _JumpForce = -150;
 
     private enum State
     {
@@ -24,6 +25,8 @@ public class Player
 
     private Vector2 _position, _velocity, _dimensions;
     
+    internal Vector2 Velocity { get => _velocity; set => _velocity = value; }
+
     private Rectangle _gameBoundingBox;
 
     internal Rectangle BoundingBox
@@ -35,7 +38,7 @@ public class Player
     {
         _position = position;
         _gameBoundingBox = gameBoundingBox;
-        _dimensions = new Vector2(46, 40);
+        _dimensions = new Vector2(36, 35);
     }
 
     internal void Initialize()
@@ -128,7 +131,7 @@ public class Player
 
     internal void MoveHorizontally(float direction)
     {
-        _velocity.X = direction * Speed;
+        _velocity.X = direction * _Speed;
 
         if (_velocity.X > 0)
         {
@@ -152,7 +155,7 @@ public class Player
 
     internal void MoveVertically(float direction)
     {
-        _velocity.Y = direction * Speed;
+        _velocity.Y = direction * _Speed;
     }
 
     internal void Stop()
@@ -182,5 +185,12 @@ public class Player
     internal void StandOn(Rectangle whatILandedOn, float dt)
     {
         _velocity.Y -= PlatformerGame._Gravity * dt;
+    }
+    internal void Jump()
+    {
+        if(_state != State.Jumping)
+        {
+            _velocity.Y = _JumpForce;
+        }
     }
 }
