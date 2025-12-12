@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -18,7 +19,7 @@ public class PlatformerGame : Game
     private Player _player;
     private Collider _ground;
 
-    private Collider _colliderTop, _colliderRight, _colliderBottom, _colliderLeft;
+    private List<Platform> _platforms;
 
     public PlatformerGame()
     {
@@ -36,12 +37,13 @@ public class PlatformerGame : Game
         _player = new Player(new Vector2(250, 50), _gameBoundingBox);
         _ground = new Collider(new Vector2(0, 300), new Vector2(_WindowWidth, 1), Collider.ColliderType.Top);
 
-        //the top collider's top left corner is at 160, 270
-        //the right collider needs to begin at 250,270 PLUS THE WIDTH OF THE TOP COLLIDER
-        _colliderTop = new Collider(new Vector2(160, 230), new Vector2(80, 1), Collider.ColliderType.Top);
-        _colliderRight = new Collider(new Vector2(250, 230), new Vector2(1, 20), Collider.ColliderType.Right);
-        _colliderBottom = new Collider(new Vector2(160, 250), new Vector2(80, 1), Collider.ColliderType.Bottom);
-        _colliderLeft = new Collider(new Vector2(150, 230), new Vector2(1, 20), Collider.ColliderType.Left);
+        _platforms = new List<Platform>();
+
+        _platforms.Add(new Platform(new Vector2(50, 100), new Vector2(50, 25), ""));
+        _platforms.Add(new Platform(new Vector2(150, 150), new Vector2(50, 25), ""));
+        _platforms.Add(new Platform(new Vector2(250, 200), new Vector2(50, 25), ""));
+        _platforms.Add(new Platform(new Vector2(350, 250), new Vector2(50, 25), ""));
+        _platforms.Add(new Platform(new Vector2(450, 300), new Vector2(50, 25), ""));
 
 
         base.Initialize();
@@ -54,10 +56,10 @@ public class PlatformerGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _player.LoadContent(Content);
         _ground.LoadContent(GraphicsDevice);
-        _colliderTop.LoadContent(GraphicsDevice);
-        _colliderRight.LoadContent(GraphicsDevice);
-        _colliderBottom.LoadContent(GraphicsDevice);
-        _colliderLeft.LoadContent(GraphicsDevice);
+        foreach(Platform platform in _platforms)
+        {
+            platform.LoadContent(GraphicsDevice);
+        }
     }
 
     protected override void Update(GameTime gameTime)
@@ -83,10 +85,10 @@ public class PlatformerGame : Game
 
         
         _ground.ProcessCollision(_player, dt);
-        _colliderTop.ProcessCollision(_player, dt);
-        _colliderRight.ProcessCollision(_player, dt);
-        _colliderBottom.ProcessCollision(_player, dt);
-        _colliderLeft.ProcessCollision(_player, dt);
+        foreach (Platform platform in _platforms)
+        {
+            platform.ProcessCollisions(_player, dt);
+        }
 
         _player.Update(gameTime);
 
@@ -99,10 +101,10 @@ public class PlatformerGame : Game
         _spriteBatch.Begin();
         _player.Draw(_spriteBatch);
         _ground.Draw(_spriteBatch);
-        _colliderTop.Draw(_spriteBatch);
-        _colliderRight.Draw(_spriteBatch);
-        _colliderBottom.Draw(_spriteBatch);
-        _colliderLeft.Draw(_spriteBatch);
+        foreach (Platform platform in _platforms)
+        {
+            platform.Draw(_spriteBatch);
+        }
 
         _spriteBatch.End();
 
